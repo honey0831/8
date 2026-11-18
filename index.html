@@ -1,0 +1,3976 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>班级全能管理系统 - 终极版</title>
+<style>
+:root{--blue:#2563eb;--blue-d:#1d4ed8;--blue-l:#eff6ff;--bg:#f8fafc;--card:#fff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;--green:#10b981;--red:#ef4444;--shadow:0 4px 20px rgba(37,99,235,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:14px;transition:all .2s}
+input,select,textarea{font-family:inherit;font-size:15px;color:var(--text);outline:none}
+.hidden{display:none!important}
+
+/* 登录页 */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eff6ff,#fff);padding:24px 16px}
+.login-card{width:100%;max-width:420px;background:#fff;border-radius:20px;padding:36px 32px;box-shadow:0 12px 50px rgba(37,99,235,.1);border:1px solid #f1f5f9}
+.login-title{font-size:24px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px;color:var(--blue)}
+.login-sub{color:var(--muted);font-size:13.5px;margin-bottom:28px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13.5px;color:var(--muted);margin-bottom:8px}
+.field input{width:100%;height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;background:#f8fafc}
+.field input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+.login-btn{width:100%;height:48px;border-radius:12px;background:var(--blue);color:#fff;font-size:16px;font-weight:600;margin-top:10px;box-shadow:0 6px 16px rgba(37,99,235,.3)}
+.login-switch{text-align:center;margin-top:20px;font-size:13.5px;color:var(--muted)}
+.login-switch b{color:var(--blue);cursor:pointer}
+
+/* 欢迎遮罩（全屏覆盖） */
+.welcome-mask{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .35s ease;padding:24px}
+.welcome-mask.show{opacity:1;pointer-events:auto}
+.welcome-card{width:min(600px,92vw);max-height:86vh;background:#fff;border-radius:26px;padding:52px 40px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.28);transform:scale(.88);transition:transform .45s cubic-bezier(0.175,0.885,0.32,1.275)}
+.welcome-mask.show .welcome-card{transform:scale(1)}
+.welcome-emoji{font-size:52px;line-height:1;margin-bottom:18px}
+.welcome-title{font-size:30px;font-weight:800;letter-spacing:3px;color:#0f172a;margin-bottom:14px}
+.welcome-line{width:60px;height:3px;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:2px;margin:0 auto 18px}
+.welcome-sub{font-size:15px;font-weight:500;color:#64748b;letter-spacing:6px}
+.welcome-tip{margin-top:26px;font-size:13px;color:#94a3b8}
+
+/* 顶部栏 */
+.topbar{min-height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;position:sticky;top:0;z-index:20;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#60a5fa,#2563eb);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.brand .mark svg{width:22px;height:22px;fill:#fff}
+.brand-txt .t{font-size:19px;font-weight:800;color:var(--text);letter-spacing:.5px}
+.brand-txt .s{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:2px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 8px rgba(16,185,129,.5)}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.tbtn{height:38px;padding:0 16px;border-radius:10px;color:#fff;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.tbtn:hover{filter:brightness(1.05);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.1)}
+.tbtn.sync{background:#3b82f6}.tbtn.sync{border:1px solid #a7f3d0}
+.tbtn.export{background:#10b981}.tbtn.profile{background:#f1f5f9;color:#475569}
+.tbtn.lucky{background:linear-gradient(135deg,#8b5cf6,#6366f1)}
+.tbtn.notice{background:#f59e0b}.tbtn.timer{background:#0ea5e9}
+
+/* 布局与侧边栏 */
+.layout{display:flex;gap:20px;padding:24px;max-width:1600px;margin:0 auto;align-items:flex-start}
+.sidebar{width:280px;flex:none;display:flex;flex-direction:column;gap:16px;position:sticky;top:88px}
+.card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid #f1f5f9;overflow:hidden}
+.card-hd{padding:16px 20px;border-bottom:1px solid #f1f5f9;font-size:15px;font-weight:700;color:#1e293b;display:flex;justify-content:space-between;align-items:center}
+.card-bd{padding:20px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
+.stat{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid #e2e8f0;text-align:center}
+.stat .k{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:4px}
+.stat .v{font-size:28px;font-weight:800;color:var(--blue)}
+.stat.alt .v{color:var(--green)}
+.today-row{display:flex;justify-content:space-between;padding:0 4px 12px;font-size:13px;color:#64748b}
+.today-row b{color:#2563eb;font-weight:700}
+
+/* 主区域 */
+.main{flex:1;min-width:0}
+.tabs{display:flex;background:#fff;border-radius:16px;padding:6px;gap:6px;box-shadow:var(--shadow);margin-bottom:20px;overflow-x:auto}
+.tab{flex:1;min-width:100px;height:44px;border-radius:12px;font-size:14.5px;font-weight:600;color:#64748b;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.tab:hover{background:#f8fafc;color:var(--blue)}
+.tab.on{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.25)}
+.panel{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px;border:1px solid #f1f5f9}
+
+/* 公告横幅 */
+.notice-bar{display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#92400e}
+.notice-bar .ico{font-size:16px;line-height:1.4}
+
+/* 表格美化 */
+.tbl-scroll{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th{text-align:left;font-size:13px;color:#64748b;font-weight:600;padding:14px 16px;background:#f8fafc;white-space:nowrap;border-bottom:2px solid #e2e8f0}
+td{padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;vertical-align:middle}
+tr:hover td{background:#f8fafc}
+
+/* 组件样式 */
+.name-cell{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;background:#cbd5e1}
+.avatar.g1{background:#60a5fa}.avatar.g2{background:#34d399}.avatar.g3{background:#f87171}.avatar.g4{background:#a78bfa}.avatar.g5{background:#fbbf24}.avatar.g6{background:#38bdf8}.avatar.g7{background:#4ade80}.avatar.g8{background:#fb7185}.avatar.g9{background:#94a3b8}
+.score-num{font-weight:700;color:var(--blue);font-size:16px}
+.tag-group{display:inline-block;padding:4px 10px;border-radius:6px;background:var(--blue-l);color:var(--blue);font-size:12.5px;font-weight:500}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.act{height:30px;padding:0 10px;border-radius:6px;font-size:13px;font-weight:500;display:inline-flex;align-items:center}
+.act.plus{background:#ecfdf5;color:#059669}.act.minus{background:#fef2f2;color:#dc2626}.act.plain{background:#f1f5f9;color:#475569}.act.del{background:#fef2f2;color:#dc2626}
+.act.edit{background:#eef2ff;color:#4f46e5}
+.text-red{color:#ef4444!important;font-weight:700}
+.empty{padding:40px 16px;text-align:center;color:#94a3b8;font-size:14px}
+
+/* 弹窗与提示 */
+.modal-back{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:60px 16px 30px;overflow-y:auto;backdrop-filter:blur(3px)}
+.modal{width:100%;max-width:480px;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.2);overflow:hidden;animation:popIn .3s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
+@keyframes popIn{0%{transform:scale(.95);opacity:0}100%{transform:scale(1);opacity:1}}
+.m-hd{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 10px}
+.m-hd h3{font-size:18px;font-weight:700}
+.m-close{width:32px;height:32px;border-radius:8px;color:#94a3b8;font-size:22px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;cursor:pointer}
+.m-bd{padding:10px 24px}
+.m-ft{display:flex;justify-content:flex-end;gap:12px;padding:20px 24px 24px;flex-wrap:wrap}
+.btn-line{height:40px;padding:0 24px;border-radius:10px;background:#f1f5f9;color:#475569;font-size:14.5px;font-weight:500;cursor:pointer}
+.btn-solid{height:40px;padding:0 28px;border-radius:10px;background:var(--blue);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer}
+.btn-danger{background:#fff6f6;color:#e0454c}
+.hist-list{max-height:400px;overflow-y:auto;padding-right:6px}
+.hist-item{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #f1f5f9;align-items:center}
+.h-num.up{color:var(--green);font-weight:700}.h-num.down{color:var(--red);font-weight:700}
+
+/* 表单通用（弹窗内） */
+.f{margin-bottom:12px}
+.f label{display:block;font-size:13px;color:#64748b;margin-bottom:6px}
+.f input,.f select{width:100%;height:40px;border:1px solid #e2e8f0;border-radius:8px;padding:0 12px;background:#fff}
+.f input:focus,.f select:focus{border-color:var(--blue)}
+/* 性别等点选按钮 */
+.sex-pill{height:40px;flex:1;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;color:#475569;font-size:14.5px;font-weight:600;cursor:pointer;transition:.15s}
+.sex-pill:hover{border-color:#bfdbfe;background:#f8fbff}
+.sex-pill.on{border-color:#2563eb;background:#eff6ff;color:#2563eb;box-shadow:0 2px 8px rgba(37,99,235,.15)}
+/* 自绘选择器（替代原生 select，任何环境都能点开） */
+.pick-btn{width:100%;height:42px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:15px;color:#0f172a;cursor:pointer;text-align:left}
+.pick-btn:hover{border-color:#bfdbfe;background:#f8fbff}
+.pick-val{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pick-chev{color:#94a3b8;font-size:18px;line-height:1;margin-left:8px}
+.pick-list{display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow-y:auto;padding:2px}
+.pick-item{width:100%;min-height:46px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;padding:0 14px;font-size:15px;color:#334155;font-weight:500;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pick-item:hover{border-color:#bfdbfe;background:#f8fbff}
+.pick-item.on{border-color:#2563eb;background:#eff6ff;color:#2563eb;font-weight:700}
+.pick-item.dis{opacity:.45;cursor:not-allowed}
+
+/* 倒计时浮层与提示 */
+.timer-overlay{position:fixed;inset:0;background:#fff;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.timer-time{font-size:140px;font-weight:800;font-family:monospace;color:var(--blue);margin-bottom:40px;letter-spacing:-4px}
+.timer-btn{height:44px;padding:0 18px;border-radius:10px;background:#f1f5f9;color:#475569;font-weight:600;font-size:15px}
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);background:rgba(15,23,42,.9);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;opacity:0;transition:.3s;z-index:9999;pointer-events:none;max-width:80vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* 作业白板 */
+.hw-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.hw-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.05);border:1px solid #f1f5f9;position:relative;padding-bottom:44px}
+.hw-card .hw-sub{font-size:16px;font-weight:700;color:#1e293b;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+
+/* 二级标签 & 小组可点击行 */
+.subtab{height:36px;padding:0 18px;border-radius:9px;font-size:14px;font-weight:600;color:#64748b;background:transparent}
+.subtab.on{background:#fff;color:var(--blue);box-shadow:0 2px 8px rgba(37,99,235,.15)}
+.group-row{cursor:pointer}
+.group-row:hover td{background:#eff6ff!important}
+.group-name-cell{display:flex;align-items:center;gap:8px;color:#2563eb;font-weight:600}
+.group-name-cell .chev{font-size:12px;color:#94a3b8;font-weight:400}
+
+/* 响应式 */
+@media (max-width:900px){
+  .layout{flex-direction:column;padding:16px}
+  .sidebar{width:100%;position:static}
+  .topbar{padding:10px 16px}
+  .timer-time{font-size:80px}
+  .panel{padding:16px}
+  .welcome-card{padding:36px 24px}
+  .welcome-title{font-size:21px;letter-spacing:2px}
+  .welcome-sub{font-size:13px;letter-spacing:3px}
+  .welcome-emoji{font-size:40px}
+}
+/* 只读（家长查看）模式 */
+body.readonly .sidebar{display:none}
+body.readonly .top-actions{display:none}
+body.readonly #tbodyStu td:last-child, body.readonly #panel-students th:last-child,
+body.readonly #tbodyGrp td:last-child, body.readonly #panel-groups th:last-child{display:none}
+body.readonly #btnBatchStu, body.readonly #btnAddDaily, body.readonly #btnExpDaily,
+body.readonly #btnAddExam, body.readonly #btnImportExam, body.readonly #btnAddGoods,
+body.readonly #btnAddHomework, body.readonly #btnExportExam{display:none}
+body.readonly .main{max-width:100%}
+body.ro-badge{position:fixed;right:12px;bottom:12px;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:1px solid #bfdbfe;z-index:60}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="loginView">
+  <div class="login-card">
+    <div class="login-title" style="display:flex;align-items:center;gap:10px">班级全能管理系统</div>
+    <p class="login-sub">登录后数据自动同步到云端，换电脑登录同一账号即可查看</p>
+    <div class="field"><label>账号</label><input id="loginUser" type="text" placeholder="请输入账号"></div>
+    <div class="field"><label>密码</label><input id="loginPass" type="password" placeholder="请输入密码"></div>
+    <div class="field hidden" id="regPassWrap"><label>确认密码</label><input id="loginPass2" type="password" placeholder="再次输入密码"></div>
+    <div class="login-err" id="loginErr" style="color:#ef4444;font-size:13px;min-height:20px;margin-top:8px"></div>
+    <button class="login-btn" id="loginBtn">登录</button>
+    <div class="login-switch" id="loginSwitch">还没有账号？<b>立即注册</b></div>
+  </div>
+</div>
+
+<!-- 全屏欢迎遮罩：点击登录后才出现 -->
+<div class="welcome-mask hidden" id="welcomeMask">
+  <div class="welcome-card">
+    <div class="welcome-emoji">🎉</div>
+    <div class="welcome-title">欢迎进入高二一班班级全能管理系统</div>
+    <div class="welcome-line"></div>
+    <div class="welcome-sub">一班英才 星辉满怀 书山利剑 决胜未来</div>
+    <div class="welcome-tip">正在为你加载班级数据…</div>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark"><svg viewBox="0 0 24 24"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="17" y="4" width="4" height="17" rx="1"/></svg></div>
+      <div class="brand-txt"><div class="t">班级全能终端</div><div class="s"><span class="dot"></span><span id="curUser">—</span> · <span id="cloudDot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block"></span><span id="syncStatus">云端已连接</span></div></div>
+    </div>
+    <div class="top-actions">
+      <button class="tbtn sync" id="btnSyncNow" style="background:#ecfdf5;color:#047857">☁️ 立即同步</button>
+      <button class="tbtn notice" id="btnNotice">📢 班级公告</button>
+      <button class="tbtn timer" id="btnTimer">⏰ 倒计时</button>
+      <button class="tbtn lucky" id="btnLucky">🎲 抽人</button>
+      <button class="tbtn export" id="btnExport">导出 Excel 报表</button>
+      <button class="tbtn profile" id="btnProfile">个人中心</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="card">
+        <div class="stat-row">
+          <div class="stat"><div class="k">学生总数</div><div class="v" id="statStu">0</div></div>
+          <div class="stat alt"><div class="k">全班总积分</div><div class="v" id="statTotalScore">0</div></div>
+        </div>
+        <div class="card-bd" style="padding-top:0">
+          <div class="today-row"><span>今日加分</span><b id="todayPlus">0 次</b></div>
+          <div class="today-row"><span>今日扣分</span><b id="todayMinus">0 次</b></div>
+          <div class="today-row" style="padding-bottom:0"><span>今日净变化</span><b id="todayNet">0</b></div>
+        </div>
+      </div>
+
+      <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:none;box-shadow:none">
+        <div class="card-bd" style="text-align:center;padding:22px 16px">
+          <div style="font-size:14px;color:#475569;font-weight:600;margin-bottom:6px">距离 <span id="examName" contenteditable="true" style="border-bottom:1px dashed #93c5fd;cursor:text;outline:none">期末考试</span> 还有</div>
+          <div style="font-size:40px;font-weight:800;color:#2563eb;line-height:1.1" id="examCountdown">--</div>
+          <div id="examDateText" style="font-size:12.5px;color:#64748b;margin-top:10px">目标日期：未设置</div>
+          <button id="btnSetExamDate" style="margin-top:12px;height:34px;padding:0 18px;border-radius:9px;background:#fff;color:#2563eb;font-size:13px;font-weight:600;border:1px solid #bfdbfe;box-shadow:0 2px 8px rgba(37,99,235,.08)">设置目标日期</button>
+          <div style="font-size:11.5px;color:#94a3b8;margin-top:10px">上方标题文字可点击直接修改</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">快捷操作</div>
+        <div class="card-bd" style="display:flex;flex-direction:column;gap:12px">
+          <button class="tbtn sync" id="btnOpenAddStu" style="justify-content:center;width:100%">+ 新增学生</button>
+          <button class="tbtn export" id="btnOpenCsv" style="justify-content:center;width:100%">📁 批量导入名单</button>
+          <button class="tbtn" id="btnTplStu" style="justify-content:center;width:100%;background:#64748b">⬇ 下载学生名单模板</button>
+          <button class="tbtn lucky" id="btnTplExam" style="justify-content:center;width:100%;background:#7c3aed">⬇ 下载成绩导入模板</button>
+          <button class="tbtn" id="btnImportExam" style="justify-content:center;width:100%;background:#0891b2">📥 导入成绩表</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <nav class="tabs" id="tabs">
+        <button class="tab on" data-tab="students">👨‍🎓 学生榜</button>
+        <button class="tab" data-tab="groups">👥 小组榜</button>
+        <button class="tab" data-tab="exam">📊 成绩大榜</button>
+        <button class="tab" data-tab="homework">📝 作业白板</button>
+        <button class="tab" data-tab="shop">🎁 商城</button>
+        <button class="tab" data-tab="feeds">📢 动态墙</button>
+        <button class="tab" data-tab="attendance">📋 考勤</button>
+        <button class="tab" data-tab="daily">🗒 日清记录</button>
+        <button class="tab" data-tab="summary">📈 周月总结</button>
+      </nav>
+
+      <section class="panel" id="panel-students">
+        <div class="notice-bar hidden" id="noticeBar">
+          <span class="ico">📢</span>
+          <div id="noticeText" style="flex:1;white-space:pre-wrap"></div>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#1e293b">📊 学期积分数据汇总</div>
+            <div style="font-size:13px;color:#64748b;margin-top:4px">全班累计共产生 <b id="sumLogs" style="color:#2563eb">0</b> 次加减分记录</div>
+          </div>
+          <div style="display:flex;gap:24px;text-align:right;flex-wrap:wrap">
+            <div><div style="font-size:12px;color:#94a3b8">全班总积分</div><div style="font-size:20px;font-weight:800;color:#2563eb" id="sumTotalScore">0</div></div>
+            <div><div style="font-size:12px;color:#94a3b8">班级人均分</div><div style="font-size:20px;font-weight:800;color:#10b981" id="sumAvgScore">0</div></div>
+          </div>
+        </div>
+
+        <div class="toolbar" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <input id="searchStu" placeholder="搜索学生姓名 / 小组..." style="flex:1;min-width:180px;height:42px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px">
+          <div style="min-width:140px">
+            <button type="button" class="pick-btn" id="filterGroupBtn"><span class="pick-val">全部小组</span><span class="pick-chev">›</span></button>
+            <input type="hidden" id="filterGroup" value="">
+          </div>
+          <button style="background:#f59e0b;color:#fff;padding:0 16px;height:42px;border-radius:10px;font-weight:600" id="btnBatchStu">批量加减</button>
+        </div>
+
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>排名</th><th>姓名</th><th>小组</th><th>职务</th><th>积分</th><th>操作</th></tr></thead>
+            <tbody id="tbodyStu"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="panel-groups">
+        <div class="tbl-scroll">
+          <table><thead><tr><th>排名</th><th>小组名称</th><th>人数</th><th>总积分</th><th>人均积分</th><th>操作</th></tr></thead><tbody id="tbodyGrp"></tbody></table>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="panel-exam">
+        <div class="toolbar" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <input id="searchExam" placeholder="搜索学生姓名..." style="flex:1;min-width:180px;height:42px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px">
+          <button style="background:#3b82f6;color:#fff;padding:0 16px;height:42px;border-radius:10px;font-weight:600" id="btnAddExam">+ 录入/修改成绩</button>
+          <button style="background:#7c3aed;color:#fff;padding:0 16px;height:42px;border-radius:10px;font-weight:600" id="btnTplExam2">⬇ 下载成绩模板</button>
+          <button style="background:#0891b2;color:#fff;padding:0 16px;height:42px;border-radius:10px;font-weight:600" id="btnImportExam2">📥 导入成绩表</button>
+          <button style="background:#10b981;color:#fff;padding:0 16px;height:42px;border-radius:10px;font-weight:600" id="btnExportExam">⬇ 导出成绩单(Excel)</button>
+        </div>
+        <div id="examStats" style="display:flex;gap:16px;flex-wrap:wrap;background:#f8fafc;padding:12px 16px;border-radius:10px;font-size:13px;color:#475569;margin-bottom:16px"></div>
+        <div style="font-size:12.5px;color:#94a3b8;margin-bottom:8px">💡 「学年榜」这一列可以直接点单元格填写，填完自动保存</div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr>
+              <th style="color:#7c3aed">学年榜 ✎</th>
+              <th>总分排</th>
+              <th>姓名</th>
+              <th>语文</th><th>数学</th><th>英语</th><th>物理</th><th>化学</th><th>生物</th>
+              <th>总分</th>
+            </tr></thead>
+            <tbody id="tbodyExam"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="panel-homework">
+        <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+          <div style="font-size:14px;color:#64748b">今日作业白板</div>
+          <button style="background:var(--blue);color:#fff;padding:0 20px;height:40px;border-radius:10px;font-weight:600" id="btnAddHomework">+ 布置新作业</button>
+        </div>
+        <div class="hw-board" id="hwBoard"></div>
+      </section>
+
+      <section class="panel hidden" id="panel-shop">
+        <div class="toolbar" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <button style="background:var(--blue);color:#fff;padding:0 20px;height:40px;border-radius:10px;font-weight:600" id="btnAddGoods">+ 添加奖品</button>
+          <span id="redeemTip" style="font-size:13px;color:#94a3b8"></span>
+        </div>
+        <div class="shop-grid" id="shopGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px"></div>
+      </section>
+
+      <section class="panel hidden" id="panel-feeds">
+        <div class="toolbar" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <input id="searchFeeds" placeholder="搜索姓名 / 原因..." style="flex:1;min-width:180px;height:42px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px">
+          <div style="font-size:13px;color:#94a3b8;display:flex;align-items:center">共 <span id="feedsCount" style="margin:0 4px;color:#2563eb;font-weight:700">0</span> 条记录</div>
+        </div>
+        <div class="hist-list" id="allFeedsList" style="max-height:600px"></div>
+      </section>
+
+      <section class="panel hidden" id="panel-attendance">
+        <div class="toolbar" style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 10px;height:42px">
+            <span style="font-size:13px;color:#64748b">考勤日期</span>
+            <input id="attDate" type="text" value="" placeholder="2026-11-17" style="width:112px;border:none;outline:none;font-size:14.5px;font-weight:600;color:#1e293b;background:transparent">
+          </div>
+          <button class="act plain" style="height:38px;padding:0 12px;background:#eff6ff;color:#2563eb;font-weight:600" id="attPrev">‹ 前一天</button>
+          <button class="act plain" style="height:38px;padding:0 12px;background:#eff6ff;color:#2563eb;font-weight:600" id="attToday">今天</button>
+          <button class="act plain" style="height:38px;padding:0 12px;background:#eff6ff;color:#2563eb;font-weight:600" id="attNext">后一天 ›</button>
+          <button class="act plain" style="height:38px;padding:0 16px;background:#ecfdf5;color:#059669;font-weight:600" id="btnAllNormal">✅ 全部设为正常</button>
+          <button class="act plain" style="height:38px;padding:0 16px;background:#fef2f2;color:#dc2626;font-weight:600" id="btnExpAtt">⬇ 导出考勤(Excel)</button>
+        </div>
+        <div id="attStat" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+        <div class="tbl-scroll">
+          <table><thead><tr><th>姓名</th><th>小组</th><th>当日状态</th><th>理由</th><th>考勤操作</th></tr></thead><tbody id="tbodyAttendance"></tbody></table>
+        </div>
+        <div style="margin-top:16px">
+          <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:10px">📚 历史考勤归档</div>
+          <div class="tbl-scroll">
+            <table><thead><tr><th>日期</th><th>正常</th><th>请假</th><th>迟到</th><th>早退</th><th>旷课</th><th>操作</th></tr></thead><tbody id="tbodyAttHist"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="panel-daily">
+        <div class="toolbar" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <button style="background:#2563eb;color:#fff;padding:0 18px;height:40px;border-radius:10px;font-weight:600" id="btnAddDaily">+ 新增日清记录</button>
+          <button style="background:#10b981;color:#fff;padding:0 18px;height:40px;border-radius:10px;font-weight:600" id="btnExpDaily">⬇ 导出日清记录(Excel)</button>
+          <span style="font-size:13px;color:#94a3b8">六科随堂小考：记录日期、考试名称和每人的分数</span>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>日期</th><th>科目</th><th>考试名称</th><th>录入人数</th><th>平均分</th><th>最高分</th><th>最低分</th><th>操作</th></tr></thead>
+            <tbody id="tbodyDaily"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:22px;font-size:14px;font-weight:700;color:#334155;margin-bottom:8px">📊 每人六科日清平均分</div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>姓名</th><th>小组</th><th>语文</th><th>数学</th><th>英语</th><th>物理</th><th>化学</th><th>生物</th></tr></thead>
+            <tbody id="tbodyDailyAvg"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="panel-summary">
+        <div class="toolbar" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <button style="background:#2563eb;color:#fff;padding:0 18px;height:40px;border-radius:10px;font-weight:600" id="btnExpWeek">⬇ 导出本周总结</button>
+          <button style="background:#7c3aed;color:#fff;padding:0 18px;height:40px;border-radius:10px;font-weight:600" id="btnExpMonth">⬇ 导出本月总结</button>
+          <span style="font-size:13px;color:#94a3b8">周总结从本周一起算，月总结从本月1号起算</span>
+        </div>
+        <div id="summaryBody"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="modalBack" class="modal-back hidden"><div class="modal" id="modalBox"></div></div>
+<div id="pickBack" class="modal-back hidden" style="z-index:300"><div class="modal" id="pickBox" style="max-width:440px"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG = { APP_KEY: '6816F27B16D39A008D8E5E7948C43F71', API_DOMAIN: 'https://api.yesapi.net/', TABLE: 'score_list' };
+function getApiDomain(){
+  try{
+    const v = localStorage.getItem('class_api_domain');
+    if(v) return v.replace(/\/?$/, '/');
+  }catch(e){}
+  return CONFIG.API_DOMAIN;
+}
+function setApiDomain(v){
+  try{
+    if(v) localStorage.setItem('class_api_domain', String(v).trim().replace(/\/?$/, '/'));
+    else localStorage.removeItem('class_api_domain');
+  }catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const $ = id => document.getElementById(id);
+  const loginView = $('loginView'), appView = $('appView');
+  const curUser = $('curUser'), syncStatus = $('syncStatus');
+  let isLoginMode = true, currentUser = '', saveTimer = null, countdownTimer = null;
+  let students = [], shopGoods = [], redeemLogs = [], homeworks = [], notices = '', dailyLogs = [], attendLogs = [];
+  let attendDate = '';
+
+  /* ================= 通用工具 ================= */
+  function toast(msg){
+    const t = $('toast'); if(!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+  function openModal(){ $('modalBack').classList.remove('hidden'); }
+  function closeModal(){ $('modalBack').classList.add('hidden'); }
+
+  /* 通用确认框（替代原生 confirm，任何预览环境都能用） */
+  function uiConfirm(title, msg, onOk, okText){
+    const pb = $('pickBox');
+    if(!pb){ if(window.confirm(msg)) onOk(); return; }
+    pb.innerHTML =
+      '<div class="m-hd"><h3>'+ title +'</h3><button class="m-close" id="pkClose">×</button></div>' +
+      '<div class="m-bd"><div style="font-size:14.5px;color:#475569;line-height:1.8;white-space:pre-wrap">'+ String(msg||'') +'</div></div>' +
+      '<div class="m-ft"><button class="btn-line" id="pkCancel">取消</button>' +
+      '<button class="btn-solid" id="pkOk" style="background:#2563eb">'+ (okText || '确定') +'</button></div>';
+    $('pickBack').classList.remove('hidden');
+    const close = ()=>$('pickBack').classList.add('hidden');
+    $('pkClose').onclick = close;
+    $('pkCancel').onclick = close;
+    $('pkOk').onclick = function(){ close(); onOk(); };
+  }
+
+  /* 通用输入框（替代原生 prompt） */
+  function uiPrompt(title, label, defVal, onOk, placeholder){
+    const pb = $('pickBox');
+    if(!pb){ const v = window.prompt(label, defVal); if(v !== null) onOk(v); return; }
+    pb.innerHTML =
+      '<div class="m-hd"><h3>'+ title +'</h3><button class="m-close" id="pkClose">×</button></div>' +
+      '<div class="m-bd"><div class="f"><label>'+ label +'</label>' +
+        '<input id="pkInput" value="'+ String(defVal === null || defVal === undefined ? '' : defVal).replace(/"/g,'&quot;') +'" placeholder="'+ (placeholder || '') +'">' +
+      '</div></div>' +
+      '<div class="m-ft"><button class="btn-line" id="pkCancel">取消</button><button class="btn-solid" id="pkOk">确定</button></div>';
+    $('pickBack').classList.remove('hidden');
+    const inp = $('pkInput');
+    setTimeout(()=>{ try{ inp.focus(); inp.select(); }catch(e){} }, 60);
+    const close = ()=>$('pickBack').classList.add('hidden');
+    $('pkClose').onclick = close;
+    $('pkCancel').onclick = close;
+    $('pkOk').onclick = function(){ const v = inp.value; close(); onOk(v); };
+    inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ const v = inp.value; close(); onOk(v); } });
+  }
+
+  /* ================= 自绘选择器（替代原生 select） ================= */
+  function openPicker(title, items, current, onPick){
+    const pb = $('pickBox');
+    if(!pb) return;
+    pb.innerHTML =
+      '<div class="m-hd"><h3>'+ title +'</h3><button class="m-close" id="pkClose">×</button></div>' +
+      '<div class="m-bd"><div class="pick-list">' +
+        items.map((it,i)=>{
+          const on = String(it.value) === String(current);
+          return '<button type="button" class="pick-item'+ (on?' on':'') + (it.dis?' dis':'') +'" data-idx="'+ i +'"><span>'+ it.label +'</span>' + (on?'<span style="color:#2563eb;font-weight:700">✓</span>':'') +'</button>';
+        }).join('') +
+      '</div></div>';
+    $('pickBack').classList.remove('hidden');
+    const closePick = ()=>{ $('pickBack').classList.add('hidden'); };
+    const cb = $('pkClose'); if(cb) cb.onclick = closePick;
+    pb.querySelectorAll('.pick-item').forEach(btn=>{
+      btn.onclick = function(){
+        const it = items[Number(this.dataset.idx)];
+        if(!it) return;
+        if(it.dis){ toast('该选项暂不可选'); return; }
+        closePick();
+        onPick(it);
+      };
+    });
+  }
+
+  /* 生成"点选按钮 + 隐藏值"的字段 HTML */
+  function pickFieldHtml(id, label, val){
+    return '<button type="button" class="pick-btn" id="'+ id +'Btn">' +
+             '<span class="pick-val">'+ (label || '请选择') +'</span><span class="pick-chev">›</span>' +
+           '</button>' +
+           '<input type="hidden" id="'+ id +'" value="'+ String(val||'').replace(/"/g,'&quot;') +'">';
+  }
+
+  /* 绑定选择字段：itemsFn(当前值) 返回 [{value,label,dis}] */
+  function setupPickField(btnId, hiddenId, title, itemsFn, onAfter){
+    const btn = $(btnId), hid = $(hiddenId);
+    if(!btn || !hid) return;
+    function refresh(){
+      const items = itemsFn(hid.value);
+      const hit = items.filter(x=>String(x.value) === String(hid.value))[0];
+      const el = btn.querySelector('.pick-val');
+      if(el) el.textContent = hit ? hit.label : (hid.value || '请选择');
+    }
+    refresh();
+    btn.onclick = function(e){
+      if(e){ e.preventDefault(); e.stopPropagation(); }
+      const items = itemsFn(hid.value);
+      openPicker(title, items, hid.value, function(it){
+        hid.value = it.value;
+        refresh();
+        if(onAfter) onAfter(it.value, it);
+      });
+    };
+  }
+
+  function nowStr(){ return new Date().toLocaleString(); }
+  function isToday(str){
+    if(!str) return false;
+    const d = new Date(str);
+    if(isNaN(d.getTime())) return false;
+    const n = new Date();
+    return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+  }
+
+  /* ================= 欢迎遮罩 ================= */
+  function showWelcome(){
+    const m = $('welcomeMask');
+    m.classList.remove('hidden');
+    requestAnimationFrame(()=>{ m.classList.add('show'); });
+  }
+  function hideWelcome(){
+    const m = $('welcomeMask');
+    m.classList.remove('show');
+    setTimeout(()=>{ m.classList.add('hidden'); }, 400);
+  }
+
+  /* ================= 云端状态机 ================= */
+  let cloudBusy = false;
+  let cloudOffline = false;
+  let cloudLastFail = false;
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  function isBusyResp(j){
+    if(!j) return false;
+    const msg = String(j.msg || '') + ' ' + String((j.data && j.data.err_msg) || '');
+    if(typeof j.ret === 'number' && j.ret >= 500) return true;
+    return /繁忙|busy|超时|timeout|请稍候/i.test(msg);
+  }
+
+  function setCloudState(state){
+    const dot = $('cloudDot');
+    const map = { ok:'#10b981', busy:'#ef4444', checking:'#f59e0b', fail:'#f59e0b', idle:'#94a3b8' };
+    if(dot){ dot.style.background = map[state] || '#94a3b8'; }
+    if(state === 'busy') cloudBusy = true;
+    if(state === 'ok') cloudBusy = false;
+  }
+
+  function cloudLockText(){
+    return cloudOffline ? '离线模式（禁止上传）' : '云端繁忙（暂停上传）';
+  }
+
+  /* ================= 云端同步 ================= */
+  async function apiRequest(service, params){
+    const body = new URLSearchParams();
+    body.append('app_key', CONFIG.APP_KEY);
+    body.append('yesapi_allow_origin', '1');
+    body.append('format', 'json');
+    for(const k in params){ body.append(k, typeof params[k] === 'string' ? params[k] : JSON.stringify(params[k])); }
+
+    /* 跨域参数同时放进 URL，兼容严格模式下的浏览器/微信 WebView */
+    const base = getApiDomain() + '?s=' + service + '&yesapi_allow_origin=1&format=json';
+
+    /* 首选 POST 表单（大数据也能传） */
+    try{
+      const res = await fetch(base, {
+        method: 'POST',
+        body: body,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store'
+      });
+      if(res && res.ok){
+        const j = await res.json();
+        if(j){
+          if(isBusyResp(j)) setCloudState('busy'); else setCloudState('ok');
+          return j;
+        }
+      }
+    }catch(e){ console.warn('POST 请求失败，尝试 GET 兜底', e); }
+
+    /* GET 兜底：只给查询用（保存数据体积大，GET 会被 URL 长度截断） */
+    if(service === 'App.Table.Get' || service === 'App.Table.FreeQuery'){
+      try{
+        const res2 = await fetch(base + '&' + body.toString(), { method:'GET', mode:'cors', credentials:'omit', cache:'no-store' });
+        if(res2 && res2.ok){
+          const j2 = await res2.json();
+          if(j2){ if(isBusyResp(j2)) setCloudState('busy'); else setCloudState('ok'); }
+          return j2;
+        }
+      }catch(e2){ console.warn('API请求失败', e2); setCloudState('fail'); }
+    }
+    return null;
+  }
+
+  async function pullFromCloud(){
+    syncStatus.textContent = '正在加载...';
+    const localData = localStorage.getItem('class_backup_' + currentUser);
+    if(localData){
+      try{
+        const obj = JSON.parse(localData);
+        students = obj.students || [];
+        shopGoods = obj.shopGoods || [];
+        redeemLogs = obj.redeemLogs || [];
+        homeworks = obj.homeworks || [];
+        notices = obj.notices || '';
+        dailyLogs = obj.dailyLogs || [];
+        attendLogs = obj.attendLogs || [];
+        renderAll();
+      }catch(e){ console.warn('本地备份解析失败', e); }
+    }
+    try{
+      const r = await apiRequest('App.Table.FreeQuery', { model_name: CONFIG.TABLE, where: JSON.stringify([['user_id', '=', currentUser]]), page: 1, perpage: 50 });
+      let row = null;
+      if(r && r.data && r.data.data){ row = Array.isArray(r.data.data) ? r.data.data[0] : r.data.data; }
+      if(row && row['shopdata']){
+        const cloudData = JSON.parse(row['shopdata']);
+        if(Array.isArray(cloudData)){ students = cloudData; }
+        else{
+          students = cloudData.students || [];
+          shopGoods = cloudData.shopGoods || [];
+          redeemLogs = cloudData.redeemLogs || [];
+          homeworks = cloudData.homeworks || [];
+          notices = cloudData.notices || '';
+          dailyLogs = cloudData.dailyLogs || [];
+          attendLogs = cloudData.attendLogs || [];
+        }
+        renderAll();
+      }
+      syncStatus.textContent = '云端已连接';
+    }catch(e){
+      syncStatus.textContent = '本地模式运行中';
+    }
+  }
+
+  /* 同步状态统一入口（带颜色） */
+  function setSync(text, color){
+    if(!syncStatus) return;
+    syncStatus.textContent = text;
+    syncStatus.style.color = color || '';
+    syncStatus.style.fontWeight = color ? '600' : '';
+  }
+  function cloudOk(j){
+    return !!(j && (j.ret === 200 || j.ret === 0));
+  }
+
+  /* 上传当前全部数据到云端；返回 true/false */
+  async function pushToCloud(opt){
+    opt = opt || {};
+    if(!currentUser) return false;
+    if(readOnly) return false;   /* 仅查看模式不允许上传 */
+    if(cloudOffline || cloudBusy){
+      setSync('⚠️ ' + cloudLockText(), '#ef4444');
+      if(!opt.silent) toast('⚠️ 云端当前繁忙，已暂停上传（数据已存本机，稍后点「☁️ 立即同步」重试）');
+      return false;
+    }
+    setSync('正在上传云端…', '#f59e0b');
+    const payload = JSON.stringify({ students, shopGoods, redeemLogs, homeworks, notices, dailyLogs, attendLogs, updatedAt: Date.now() });
+
+    let existId = null;
+    try{
+      const q = await tableQuery({ where: JSON.stringify([['user_id', '=', currentUser]]) }, 8000);
+      const rows = rowsOf(q);
+      let row = (rows || []).filter(function(x){ return x && String(x['user_id'] || '') === String(currentUser); })[0] || null;
+      if(!row){ row = await cloudFindRow(currentUser, 8000); }
+      if(row && row.id) existId = row.id;
+    }catch(e){ console.warn('查询已有记录失败', e); }
+
+    const dataObj = {
+      'user_id': currentUser,
+      'stu_name': '班级完整数据',
+      'score': students.reduce(function(n,s){ return n + (s.score || 0); }, 0),
+      'shopdata': payload
+    };
+
+    try{
+      let j = null;
+      for(let attempt = 0; attempt < 3; attempt++){
+        try{
+          if(existId){
+            j = await withTimeout(apiRequest('App.Table.Update', { model_name: CONFIG.TABLE, id: existId, data: JSON.stringify(dataObj) }), 10000);
+          }else{
+            j = await withTimeout(apiRequest('App.Table.Create', { model_name: CONFIG.TABLE, data: JSON.stringify(dataObj) }), 10000);
+          }
+        }catch(e1){ j = null; }
+        if(cloudOk(j)) break;
+        if(isBusyResp(j) && attempt < 2){
+          setSync('云端繁忙，自动重试（' + (attempt + 1) + '/2）…', '#f59e0b');
+          await sleep(2500);
+          continue;
+        }
+        break;
+      }
+      if(cloudOk(j)){
+        const t = new Date().toLocaleTimeString();
+        setSync('✅ 云端已保存 ' + t, '#10b981');
+        if(!opt.silent) toast('✅ 已同步到云端 ' + t);
+        return true;
+      }
+      if(isBusyResp(j)){
+        setCloudState('busy');
+        setSync('⚠️ 云端服务器繁忙（数据已存本机）', '#ef4444');
+        if(!opt.silent) toast('⚠️ 云端服务器繁忙，数据已存本机；已暂停自动上传，稍后再点「☁️ 立即同步」');
+      }else{
+        setSync('❌ 云端保存失败（数据已存本机）', '#ef4444');
+        if(!opt.silent) toast('❌ 云端同步失败：数据已保存在本机，可稍后点「☁️ 立即同步」重试');
+      }
+      return false;
+    }catch(e){
+      setSync('❌ 云端保存失败（数据已存本机）', '#ef4444');
+      if(!opt.silent) toast('❌ 云端同步超时：数据已保存在本机，请检查网络后再同步');
+      return false;
+    }
+  }
+
+  /* 从云端拉取一次（手动同步按钮用） */
+  async function pullFromCloudNow(){
+    if(!currentUser){ toast('请先登录'); return; }
+    cloudBusy = false;
+    setSync('正在读取云端…', '#f59e0b');
+    const res = await fetchCloudBackup(currentUser, 8000);
+    if(!res.ok){
+      setSync('❌ 云端读取失败（网络或跨域被拦）', '#ef4444');
+      toast('❌ 云端读不到数据，请检查网络/稍后重试');
+      return;
+    }
+    if(!res.data){
+      setSync('云端暂无该账号数据', '#f59e0b');
+      toast('云端还没有这个账号的数据，先点「☁️ 立即同步」上传一次');
+      return;
+    }
+    const cs = backupStat(res.data), ls = backupStat(readLocalBackup(currentUser) || { students: [], dailyLogs: [] });
+    uiConfirm('从云端拉取数据',
+      '☁️ 云端：学生 ' + cs.stu + ' 人 · 积分记录 ' + cs.log + ' 条 · 日清 ' + cs.daily + ' 次\n' +
+      '💻 本机：学生 ' + ls.stu + ' 人 · 积分记录 ' + ls.log + ' 条 · 日清 ' + ls.daily + ' 次\n\n' +
+      '用云端数据覆盖本机？',
+      function(){
+        applyBackupData(res.data);
+        renderAll();
+        setSync('✅ 已从云端拉取', '#10b981');
+        toast('✅ 已用云端数据覆盖本机');
+        scheduleSave();
+      }, '用云端覆盖本机');
+  }
+
+  function scheduleSave(){
+    try{
+      localStorage.setItem('class_backup_' + currentUser, JSON.stringify({ students, shopGoods, redeemLogs, homeworks, notices, dailyLogs, attendLogs, updatedAt: Date.now() }));
+    }catch(e){ console.warn('本地保存失败', e); }
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async function(){
+      const ok = await pushToCloud({ silent: true }).catch(function(){ return false; });
+      if(!ok){
+        /* 失败后再自动重试一次，避免网络抖动导致没传上去 */
+        setTimeout(function(){ pushToCloud({ silent: true }).catch(function(){}); }, 4000);
+      }
+    }, 1500);
+  }
+
+  /* ================= 数据比对工具（登录时用） ================= */
+  function readLocalBackup(user){
+    try{
+      const raw = localStorage.getItem('class_backup_' + user);
+      if(!raw) return null;
+      const obj = JSON.parse(raw);
+      if(!obj || typeof obj !== 'object') return null;
+      if(Array.isArray(obj)) return { students: obj, shopGoods: [], redeemLogs: [], homeworks: [], notices: '', dailyLogs: [], attendLogs: [], updatedAt: 0 };
+      return {
+        students: obj.students || [], shopGoods: obj.shopGoods || [],
+        redeemLogs: obj.redeemLogs || [], homeworks: obj.homeworks || [],
+        notices: obj.notices || '', dailyLogs: obj.dailyLogs || [], attendLogs: obj.attendLogs || [],
+        updatedAt: obj.updatedAt || 0
+      };
+    }catch(e){ return null; }
+  }
+
+  function applyBackupData(d){
+    students = d.students || [];
+    shopGoods = d.shopGoods || [];
+    redeemLogs = d.redeemLogs || [];
+    homeworks = d.homeworks || [];
+    notices = d.notices || '';
+    dailyLogs = d.dailyLogs || [];
+    attendLogs = d.attendLogs || [];
+    try{
+      const td = todayStr();
+      const day = attendLogs.filter(function(x){ return String(x.date) === td; })[0];
+      students.forEach(function(st){
+        const it = day && day.items ? (day.items[st.id] || day.items[String(st.id)]) : null;
+        st.attend = (it && it.status) ? it.status : '';
+      });
+    }catch(e){}
+  }
+
+  function backupStat(d){
+    const stu = (d.students || []).length;
+    const log = (d.students || []).reduce(function(n,s){ return n + ((s.logs && s.logs.length) || 0); }, 0);
+    const daily = (d.dailyLogs || []).length;
+    return { stu: stu, log: log, daily: daily };
+  }
+
+  function backupStatText(prefix, d){
+    const st = backupStat(d);
+    let tail = '（无保存时间记录）';
+    if(d.updatedAt){
+      const dt = new Date(d.updatedAt);
+      tail = '（最后保存 ' + fmtDate(dt.getTime()) + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + '）';
+    }
+    return prefix + '：学生 ' + st.stu + ' 人 · 积分记录 ' + st.log + ' 条 · 日清 ' + st.daily + ' 次 ' + tail;
+  }
+
+  /* 从任意返回结构里取出数据行数组 */
+  function pickRows(j){
+    if(!j) return [];
+    const walk = function(v){
+      if(!v) return [];
+      if(Array.isArray(v)) return v;
+      if(typeof v === 'object'){
+        if(Array.isArray(v.data)) return v.data;
+        if(v.data && typeof v.data === 'object'){
+          if(Array.isArray(v.data.data)) return v.data.data;
+          if(Array.isArray(v.data.list)) return v.data.list;
+          if(Array.isArray(v.data.items)) return v.data.items;
+        }
+        if(Array.isArray(v.list)) return v.list;
+        if(Array.isArray(v.items)) return v.items;
+      }
+      return [];
+    };
+    return walk(j) || [];
+  }
+
+  /* 正确的列表查询接口：App.Table.FreeQuery */
+  async function tableQuery(params, timeoutMs){
+    const p = { model_name: CONFIG.TABLE, page: 1, perpage: 200, is_real_total: 0 };
+    if(params) for(const k in params) p[k] = params[k];
+    return await withTimeout(apiRequest('App.Table.FreeQuery', p), timeoutMs || 8000);
+  }
+
+  /* 从 FreeQuery 返回里取列表 */
+  function rowsOf(j){
+    if(!j) return [];
+    if(j.data && Array.isArray(j.data.list)) return j.data.list;
+    if(Array.isArray(j.list)) return j.list;
+    return pickRows(j);
+  }
+
+  /* 拉取整表（不依赖 where），在前端按 user_id 匹配 */
+  async function cloudFindRow(user, timeoutMs){
+    try{
+      const j = await tableQuery({}, timeoutMs);
+      if(j === null || isBusyResp(j)){ cloudLastFail = true; return null; }
+      const rows = rowsOf(j);
+      return (rows || []).filter(function(r){ return r && String(r['user_id'] || '') === String(user); })[0] || null;
+    }catch(e){ console.warn('整表查询失败', e); cloudLastFail = true; return null; }
+  }
+
+  function withTimeout(promise, ms){
+    return new Promise(function(resolve, reject){
+      let done = false;
+      const timer = setTimeout(function(){ if(!done){ done = true; reject(new Error('timeout')); } }, ms || 6000);
+      Promise.resolve(promise).then(function(v){ if(!done){ done = true; clearTimeout(timer); resolve(v); } },
+        function(e){ if(!done){ done = true; clearTimeout(timer); reject(e); } });
+    });
+  }
+
+  /* 云端数据：返回 { ok:布尔(请求是否成功), data:数据或null } */
+  async function fetchCloudBackup(user, timeoutMs){
+    try{
+      cloudLastFail = false;
+      const r = await tableQuery({ where: JSON.stringify([['user_id', '=', user]]) }, timeoutMs);
+      if(r === null || isBusyResp(r)) return { ok:false, data:null };
+      let rows = rowsOf(r);
+      let row = (rows || []).filter(function(x){ return x && String(x['user_id'] || '') === String(user); })[0] || null;
+      /* 条件查询没拿到，就拉整表前端匹配 */
+      if(!row || !row['shopdata']){
+        row = await cloudFindRow(user, timeoutMs);
+      }
+      if(!row || !row['shopdata']){
+        if(cloudLastFail) return { ok:false, data:null };
+        return { ok:true, data:null };
+      }
+      const obj = JSON.parse(row['shopdata']);
+      if(Array.isArray(obj)) return { ok:true, data:{ students: obj, shopGoods: [], redeemLogs: [], homeworks: [], notices: '', dailyLogs: [], attendLogs: [], updatedAt: 0 } };
+      return { ok:true, data:{
+        students: obj.students || [], shopGoods: obj.shopGoods || [],
+        redeemLogs: obj.redeemLogs || [], homeworks: obj.homeworks || [],
+        notices: obj.notices || '', dailyLogs: obj.dailyLogs || [], attendLogs: obj.attendLogs || [],
+        updatedAt: obj.updatedAt || 0
+      } };
+    }catch(e){ console.warn('云端数据读取失败', e); return { ok:false, data:null }; }
+  }
+
+  /* 在云端为该账号建立一条空记录（注册/首次登录时调用，失败不影响使用） */
+  async function ensureCloudAccount(user, timeoutMs){
+    try{
+      const q = await tableQuery({ where: JSON.stringify([['user_id', '=', user]]) }, timeoutMs);
+      const rows = rowsOf(q);
+      let row = (rows || []).filter(function(x){ return x && String(x['user_id'] || '') === String(user); })[0] || null;
+      if(!row){ row = await cloudFindRow(user, timeoutMs); }
+      if(row && row['shopdata']) return true;
+      const payload = JSON.stringify({ students: [], shopGoods: [], redeemLogs: [], homeworks: [], notices: '', dailyLogs: [], updatedAt: Date.now() });
+      const dataObj = { 'user_id': user, 'stu_name': '班级完整数据', 'score': 0, 'shopdata': payload };
+      if(row && row.id){
+        await withTimeout(apiRequest('App.Table.Update', { model_name: CONFIG.TABLE, id: row.id, data: JSON.stringify(dataObj) }), timeoutMs || 6000);
+      }else{
+        await withTimeout(apiRequest('App.Table.Create', { model_name: CONFIG.TABLE, data: JSON.stringify(dataObj) }), timeoutMs || 6000);
+      }
+      return true;
+    }catch(e){ console.warn('云端建号失败', e); return false; }
+  }
+
+  /* 多选项弹窗（返回 Promise） */
+  function uiChoice(title, msg, opts){
+    return new Promise(function(resolve){
+      const pb = $('pickBox');
+      if(!pb){ resolve(opts[0].value); return; }
+      pb.innerHTML =
+        '<div class="m-hd"><h3>'+ title +'</h3></div>' +
+        '<div class="m-bd"><div style="font-size:14px;color:#475569;line-height:1.9;white-space:pre-wrap">'+ String(msg || '') +'</div></div>' +
+        '<div class="m-ft">' + opts.map(function(o,i){
+          return '<button class="'+ (o.primary ? 'btn-solid' : 'btn-line') +'" id="uc'+ i +'" style="'+(o.primary ? '' : '')+'">'+ o.label +'</button>';
+        }).join('') + '</div>';
+      $('pickBack').classList.remove('hidden');
+      opts.forEach(function(o, i){
+        const btn = $('uc' + i);
+        if(btn) btn.onclick = function(){ $('pickBack').classList.add('hidden'); resolve(o.value); };
+      });
+    });
+  }
+
+  /* ================= 登录 / 注册 ================= */
+  function switchMode(login){
+    isLoginMode = login;
+    $('loginErr').textContent = '';
+    if(login){
+      $('loginBtn').textContent = '登录';
+      $('loginSwitch').innerHTML = '还没有账号？<b>立即注册</b>';
+      $('regPassWrap').classList.add('hidden');
+    }else{
+      $('loginBtn').textContent = '注册';
+      $('loginSwitch').innerHTML = '已有账号？<b>返回登录</b>';
+      $('regPassWrap').classList.remove('hidden');
+    }
+  }
+
+  /* 登录前先探一次云端，繁忙就在登录页直接提示 */
+  async function precheckCloud(){
+    const el = $('loginErr');
+    if(!el) return false;
+    setCloudState('checking');
+    el.style.color = '#94a3b8';
+    el.textContent = '正在检测云端服务器状态…';
+    let j = null;
+    try{ j = await tableQuery({}, 8000); }catch(e){ j = null; }
+    if(!j){
+      setCloudState('fail');
+      el.style.color = '#f59e0b';
+      el.textContent = '⚠️ 云端暂时连不上（网络或跨域被拦），现在登录只能用本机数据';
+      return false;
+    }
+    if(isBusyResp(j)){
+      setCloudState('busy');
+      el.style.color = '#ef4444';
+      el.textContent = '⚠️ 云端服务器繁忙，此时登录可能读到空白数据，建议稍后再登录';
+      return false;
+    }
+    setCloudState('ok');
+    el.style.color = '';
+    el.textContent = '';
+    return true;
+  }
+
+  async function doLogin(){
+    $('loginErr').textContent = '';
+    const u = $('loginUser').value.trim();
+    const p = $('loginPass').value.trim();
+    if(!u || !p){ $('loginErr').textContent = '账号和密码不能为空'; return; }
+
+    if(isLoginMode){
+      const saved = localStorage.getItem('class_user_' + u);
+      let localPwd = null;
+      if(saved){ try{ localPwd = JSON.parse(saved).pwd; }catch(e){ localPwd = null; } }
+
+      /* 本机已有账号：校验密码 */
+      if(saved && localPwd !== null && localPwd !== p){ $('loginErr').textContent = '密码错误'; return; }
+
+      /* 本机没有这个账号（换了设备）：先查云端，有数据就自动绑定 */
+      if(!saved){
+        $('loginErr').textContent = '正在检查云端账号…';
+        const probe = await fetchCloudBackup(u, 6000);
+        if(!probe.ok){
+          $('loginErr').style.color = '#ef4444';
+          $('loginErr').textContent = cloudBusy
+            ? '⚠️ 云端服务器繁忙，暂时无法确认该账号（先别登录，避免生成空白数据），请过几分钟再试'
+            : '云端暂时连接不上（可能网络或跨域限制），请稍后重试';
+          return;
+        }
+        if(!probe.data){
+          $('loginErr').style.color = '#ef4444';
+          $('loginErr').textContent = '账号不存在，请先注册（不会自动建号）';
+          return;
+        }
+        localStorage.setItem('class_user_' + u, JSON.stringify({ pwd: p }));
+        toast('已在新设备绑定该账号');
+      }
+
+      currentUser = u;
+      curUser.textContent = u;
+      $('loginErr').textContent = '正在同步云端数据…';
+
+      const t0 = Date.now();
+      const localData = readLocalBackup(u);
+      let cloudData = null;
+      let cloudReadOk = false;
+      try{
+        const res = await fetchCloudBackup(u, 6000);
+        if(res.ok){ cloudReadOk = true; cloudData = res.data; }
+      }catch(e){ console.warn('同步失败', e); }
+
+      /* 云端读不到：
+         · 本机有过这个账号(有备份或账号密码) → 放行进系统，但锁死上传，绝不覆盖云端
+         · 全新设备且本机什么都没有 → 直接提示，不偷偷建空白数据 */
+      if(!cloudReadOk && !localData && !saved){
+        $('loginErr').style.color = '#ef4444';
+        $('loginErr').textContent = cloudBusy
+          ? '⚠️ 云端服务器繁忙，这台设备又是首次登录，为避免生成空白数据，请稍后再登录'
+          : '⚠️ 云端连接失败，这台设备又是首次登录，请稍后再登录';
+        return;
+      }
+      if(!cloudReadOk && (localData || saved)){
+        /* 允许用本机数据进去，但本次禁止上传 */
+        cloudOffline = true;
+      }
+
+      let chosen = null;   /* 'cloud' | 'local' */
+      if(cloudData && localData){
+        const cs = backupStat(cloudData), ls = backupStat(localData);
+        const cloudEmpty = cs.stu === 0 && cs.log === 0 && cs.daily === 0;
+        const localEmpty = ls.stu === 0 && ls.log === 0 && ls.daily === 0;
+        const same = cs.stu === ls.stu && cs.log === ls.log && cs.daily === ls.daily;
+        if(cloudEmpty && !localEmpty){
+          chosen = 'local';          /* 云端是空壳，本机有真数据 */
+        }else if(localEmpty && !cloudEmpty){
+          chosen = 'cloud';          /* 本机空，云端有数据 */
+        }else if(same){
+          chosen = 'cloud';
+        }else{
+          chosen = await uiChoice(
+            '选择要使用的数据',
+            '☁️ ' + backupStatText('云端数据', cloudData) + '\n' +
+            '💻 ' + backupStatText('本机数据', localData) + '\n\n' +
+            '两份数据不一致，请选择这次进入系统要用的版本。\n（选「保留本机数据」后，下次保存会覆盖云端）',
+            [{ label: '使用云端数据', value: 'cloud', primary: true }, { label: '保留本机数据', value: 'local' }]
+          );
+        }
+      }else if(cloudData){
+        chosen = 'cloud';
+      }else if(localData){
+        chosen = 'local';
+      }
+
+      if(chosen === 'cloud' && cloudData){
+        applyBackupData(cloudData);
+        const st = backupStat(cloudData);
+        toast('已从云端自动恢复：学生 ' + st.stu + ' 人 · 积分记录 ' + st.log + ' 条 · 日清 ' + st.daily + ' 次');
+      }
+      if(chosen === 'local' && localData) applyBackupData(localData);
+      renderAll();
+      if(!cloudData || chosen === 'local'){
+        /* 云端没有记录 / 云端是空壳 / 选了本机：补推一次，方便以后换设备 */
+        setTimeout(function(){ try{ pushToCloud({ silent: true }); }catch(e){} }, 200);
+      }
+      if(cloudOffline){
+        setSync('⚠️ 离线模式（禁止上传）', '#ef4444');
+        setCloudState('busy');
+      }else if(chosen === 'cloud' && cloudData) syncStatus.textContent = '云端已连接';
+      else if(chosen === 'local') syncStatus.textContent = '本机数据（下次保存覆盖云端）';
+      else if(!cloudOffline) syncStatus.textContent = '本地模式运行中';
+
+      $('loginErr').textContent = '';
+      showWelcome();
+
+      const wait = Math.max(0, 1700 - (Date.now() - t0));
+      setTimeout(()=>{
+        hideWelcome();
+        setTimeout(()=>{
+          loginView.classList.add('hidden');
+          appView.classList.remove('hidden');
+          initCountdown();
+        }, 220);
+      }, wait);
+    }else{
+      const p2 = $('loginPass2').value.trim();
+      if(!p2){ $('loginErr').textContent = '请输入确认密码'; return; }
+      if(p !== p2){ $('loginErr').textContent = '两次密码不一致'; return; }
+      if(localStorage.getItem('class_user_' + u)){ $('loginErr').textContent = '账号已存在，请直接登录'; return; }
+      /* 服务器繁忙时不允许注册，避免家长在繁忙期误建出一个空白账号 */
+      if(cloudBusy){
+        $('loginErr').style.color = '#ef4444';
+        $('loginErr').textContent = '⚠️ 服务器繁忙，暂时不能注册；请稍后再试，或使用老师提供的账号/查看链接';
+        return;
+      }
+      /* 注册前先确认云端没有同名班级，防止把真实账号注册成新号 */
+      const chk = await fetchCloudBackup(u, 6000);
+      if(chk.ok && chk.data){
+        const st0 = backupStat(chk.data);
+        if(st0.stu > 0 || st0.log > 0){
+          $('loginErr').style.color = '#ef4444';
+          $('loginErr').textContent = '该账号云端已有班级数据（学生 ' + st0.stu + ' 人），请直接用原密码登录，不要注册';
+          return;
+        }
+      }
+      if(!chk.ok){
+        $('loginErr').style.color = '#ef4444';
+        $('loginErr').textContent = '⚠️ 云端暂时连不上，无法确认账号是否已存在，请稍后再注册';
+        return;
+      }
+      localStorage.setItem('class_user_' + u, JSON.stringify({ pwd: p }));
+      /* 注册只在本机建账号，云端不自动建号；第一次同步时才会写出一条真实数据记录 */
+      toast('注册成功，已在本机创建账号；首次同步时会自动生成云端记录');
+      switchMode(true);
+    }
+  }
+
+  $('loginBtn').addEventListener('click', doLogin);
+  $('loginSwitch').addEventListener('click', ()=>switchMode(!isLoginMode));
+  $('loginPass').addEventListener('keydown', e=>{ if(e.key === 'Enter') doLogin(); });
+
+  /* ================= 小组 ================= */
+  const GROUPS = ['第1组','第2组','第3组','第4组','第5组','第6组','第7组','第8组','第9组'];
+  const DUTIES = ['普通成员','班长','副班长','学习委员','纪律委员','劳动委员','体育委员','文娱委员','小组长','课代表'];
+
+  function allGroupNames(){
+    const set = {};
+    GROUPS.forEach(g=>{ set[g] = true; });
+    students.forEach(s=>{ if(s.group) set[s.group] = true; });
+    return Object.keys(set);
+  }
+
+  /* 选择项数据 */
+  function groupPickItems(cur){
+    const arr = allGroupNames();
+    if(cur && cur !== '__custom__' && arr.indexOf(cur) < 0) arr.push(cur);
+    const items = [{ value:'', label:'未分组' }].concat(arr.map(g=>({ value:g, label:g })));
+    items.push({ value:'__custom__', label:'＋ 自定义小组…' });
+    return items;
+  }
+
+  function dutyPickItems(cur){
+    const arr = DUTIES.slice();
+    if(cur && cur !== '__custom__' && arr.indexOf(cur) < 0) arr.push(cur);
+    const items = [{ value:'', label:'无职务' }].concat(arr.map(d=>({ value:d, label:d })));
+    items.push({ value:'__custom__', label:'＋ 自定义职务…' });
+    return items;
+  }
+
+  /* 性别点选按钮 */
+  function genderPillsHtml(selected){
+    const opts = [['','未填写'],['男','男'],['女','女']];
+    return '<div style="display:flex;gap:10px" class="sex-wrap">' +
+      opts.map(o=>'<button type="button" class="sex-pill'+(o[0]===selected?' on':'')+'" data-sex="'+ o[0] +'">'+ o[1] +'</button>').join('') +
+      '</div>';
+  }
+
+  /* 渲染后绑定性别按钮 */
+  function bindFormControls(scope){
+    scope = scope || $('modalBox');
+    scope.querySelectorAll('.sex-pill').forEach(btn=>{
+      btn.onclick = function(){
+        scope.querySelectorAll('.sex-pill').forEach(b=>b.classList.remove('on'));
+        this.classList.add('on');
+      };
+    });
+  }
+
+  function readGender(scope){
+    const on = (scope || $('modalBox')).querySelector('.sex-pill.on');
+    return on ? (on.dataset.sex || '') : '';
+  }
+
+  function groupOptionsHtml(current){
+    let arr = GROUPS.slice();
+    if(current && arr.indexOf(current) < 0) arr.push(current);
+    let html = '<option value="">未分组</option>';
+    html += arr.map(g=>'<option value="'+g+'"'+(g===current?' selected':'')+'>'+g+'</option>').join('');
+    return html;
+  }
+
+  let filterGroupItems = [{ value:'', label:'全部小组' }];
+
+  function renderGroupFilter(){
+    const sel = $('filterGroup'), btn = $('filterGroupBtn');
+    if(!sel || !btn) return;
+    const all = {};
+    students.forEach(s=>{ all[s.group || '未分组'] = true; });
+    filterGroupItems = [{ value:'', label:'全部小组' }].concat(Object.keys(all).sort().map(g=>({ value:g, label:g })));
+    const hit = filterGroupItems.filter(x=>String(x.value) === String(sel.value))[0];
+    if(!hit){ sel.value = ''; }
+    const el = btn.querySelector('.pick-val');
+    if(el) el.textContent = hit ? hit.label : '全部小组';
+  }
+
+  function bindGroupFilter(){
+    const btn = $('filterGroupBtn'), sel = $('filterGroup');
+    if(!btn || !sel) return;
+    btn.onclick = function(e){
+      if(e){ e.preventDefault(); e.stopPropagation(); }
+      openPicker('按小组筛选', filterGroupItems, sel.value, function(it){
+        sel.value = it.value;
+        const el = btn.querySelector('.pick-val');
+        if(el) el.textContent = it.label;
+        renderStudentList();
+      });
+    };
+  }
+  bindGroupFilter();
+
+  /* ================= 渲染 ================= */
+  /* 每个小组固定一种头像底色 */
+  const AVATAR_COLORS = ['#60a5fa','#34d399','#f87171','#a78bfa','#fbbf24','#38bdf8','#4ade80','#fb7185','#f97316','#14b8a6','#8b5cf6','#e11d48','#0ea5e9','#84cc16','#d946ef','#6366f1'];
+  function groupColor(group){
+    if(!group || group === '未分组') return '#cbd5e1';
+    let h = 0;
+    for(let i=0;i<group.length;i++){ h = (h * 31 + group.charCodeAt(i)) % 1000000; }
+    return AVATAR_COLORS[h % AVATAR_COLORS.length];
+  }
+
+  function renderAll(){
+    renderNotice();
+    renderStats();
+    renderGroupFilter();
+    renderStudentList();
+    renderGroups();
+    renderExam();
+    renderHomework();
+    renderShop();
+    renderFeeds();
+    renderAttendance();
+    renderDaily();
+    renderSummary();
+  }
+
+  function renderNotice(){
+    const bar = $('noticeBar'); if(!bar) return;
+    if(notices && notices.trim()){
+      bar.classList.remove('hidden');
+      $('noticeText').textContent = notices;
+    }else{
+      bar.classList.add('hidden');
+    }
+  }
+
+  function renderStats(){
+    const totalScore = students.reduce((n,s)=>n+(s.score||0),0);
+    const totalLogs = students.reduce((n,s)=>n+((s.logs&&s.logs.length)||0),0);
+    if($('statStu')) $('statStu').textContent = students.length;
+    if($('statTotalScore')) $('statTotalScore').textContent = totalScore;
+    if($('sumLogs')) $('sumLogs').textContent = totalLogs;
+    if($('sumTotalScore')) $('sumTotalScore').textContent = totalScore;
+    if($('sumAvgScore')) $('sumAvgScore').textContent = students.length ? (totalScore/students.length).toFixed(1) : 0;
+
+    let plus = 0, minus = 0, net = 0;
+    students.forEach(s=>{
+      (s.logs||[]).forEach(l=>{
+        if(!isToday(l.time)) return;
+        if(l.delta > 0) plus++;
+        else if(l.delta < 0) minus++;
+        net += (l.delta||0);
+      });
+    });
+    if($('todayPlus')) $('todayPlus').textContent = plus + ' 次';
+    if($('todayMinus')) $('todayMinus').textContent = minus + ' 次';
+    if($('todayNet')) $('todayNet').textContent = (net>0?'+':'') + net;
+  }
+
+  function renderStudentList(){
+    const tbody = $('tbodyStu'); if(!tbody) return;
+    let list = [...students];
+    const kw = ($('searchStu').value || '').trim();
+    const fg = $('filterGroup') ? $('filterGroup').value : '';
+    if(kw) list = list.filter(s=>(s.name||'').includes(kw) || (s.group||'').includes(kw));
+    if(fg) list = list.filter(s=> (s.group || '未分组') === fg);
+    list.sort((a,b)=>(b.score||0)-(a.score||0));
+
+    if(list.length === 0){
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty">暂无学生，点击左侧「+ 新增学生」添加</div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = list.map((s,i)=>{
+      const medal = i===0 ? '👑' : (i===1 ? '🥈' : (i===2 ? '🥉' : ((s.score||0)>=100 ? '⭐' : '')));
+      const avColor = groupColor(s.group);
+      return '<tr>' +
+        '<td>'+ (i+1) +'</td>' +
+        '<td><div class="name-cell"><div class="avatar" style="background:'+avColor+'">'+ ((s.name||'?').charAt(0)) +'</div><span>'+ s.name +' '+ medal +'</span></div></td>' +
+        '<td>'+ (s.group || '未分组') +'</td>' +
+        '<td>'+ (s.duty || '-') +'</td>' +
+        '<td><span class="score-num">'+ (s.score||0) +'</span></td>' +
+        '<td><div class="acts">' +
+          '<button class="act plus" onclick="openScoreModal('+s.id+',\'add\')">加分</button>' +
+          '<button class="act minus" onclick="openScoreModal('+s.id+',\'minus\')">减分</button>' +
+          '<button class="act edit" onclick="openEditStudent('+s.id+')">编辑</button>' +
+          '<button class="act plain" onclick="openHistoryModal('+s.id+')">历史</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderGroups(){
+    const tbody = $('tbodyGrp'); if(!tbody) return;
+    const map = {};
+    students.forEach(s=>{
+      const g = s.group || '未分组';
+      if(!map[g]) map[g] = { count:0, total:0 };
+      map[g].count++;
+      map[g].total += (s.score||0);
+    });
+    const arr = Object.keys(map).map(name=>({ name:name, count:map[name].count, total:map[name].total, avg: map[name].count ? (map[name].total/map[name].count).toFixed(1) : '0' }))
+      .sort((a,b)=>b.total-a.total);
+
+    if(arr.length === 0){ tbody.innerHTML = '<tr><td colspan="6"><div class="empty">暂无小组数据</div></td></tr>'; return; }
+    const maxScore = Math.max.apply(null, arr.map(g=>Math.abs(g.total)).concat([1]));
+    const esc = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+
+    tbody.innerHTML = arr.map((g,i)=>{
+      const color = i===0 ? '#fbbf24' : (i===1 ? '#60a5fa' : (i===2 ? '#94a3b8' : '#cbd5e1'));
+      const percent = maxScore === 0 ? 0 : (Math.abs(g.total)/maxScore)*100;
+      return '<tr class="group-row" data-group="'+ esc(g.name) +'">' +
+        '<td>'+ (i+1) +'</td>' +
+        '<td><div class="group-name-cell">'+ esc(g.name) +'<span class="chev">点击查看成员 ›</span></div></td>' +
+        '<td>'+ g.count +'</td>' +
+        '<td><span class="score-num">'+ g.total +'</span>' +
+        '<div style="height:8px;background:#e2e8f0;border-radius:4px;margin-top:6px"><div style="height:100%;width:'+percent+'%;background:'+color+';border-radius:4px"></div></div></td>' +
+        '<td>'+ g.avg +'</td>' +
+        '<td><button class="act plain" data-gview="'+ esc(g.name) +'">查看 ›</button></td></tr>';
+    }).join('');
+
+    /* 事件绑定（比 inline onclick 更可靠，兼容含特殊字符的组名） */
+    tbody.querySelectorAll('.group-row').forEach(row=>{
+      row.onclick = function(e){
+        if(e.target && e.target.dataset && e.target.dataset.gview !== undefined) return; // 按钮自己处理
+        openGroupModal(this.dataset.group);
+      };
+    });
+    tbody.querySelectorAll('[data-gview]').forEach(btn=>{
+      btn.onclick = function(e){
+        e.stopPropagation();
+        openGroupModal(this.dataset.gview);
+      };
+    });
+  }
+
+  function examTotal(e){
+    if(!e) return 0;
+    return (e.ch||0)+(e.ma||0)+(e.en||0)+(e.ph||0)+(e.chm||0)+(e.bio||0);
+  }
+
+  function renderExam(){
+    const tbody = $('tbodyExam'); if(!tbody) return;
+    students.forEach(s=>{ if(!s.exam) s.exam = { ch:0, ma:0, en:0, ph:0, chm:0, bio:0 }; });
+
+    const subjects = ['ch','ma','en','ph','chm','bio'];
+    const rankDict = {};
+    subjects.forEach(sub=>{
+      const valid = students.map(s=>({ id:s.id, score:(s.exam[sub]||0) })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+      rankDict[sub] = {};
+      valid.forEach((x,idx)=>{ rankDict[sub][x.id] = idx+1; });
+    });
+
+    const validTotals = students.map(s=>({ id:s.id, score:examTotal(s.exam) })).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+    const totalRankDict = {};
+    validTotals.forEach((x,idx)=>{ totalRankDict[x.id] = idx+1; });
+
+    let list = [...students];
+    const kw = ($('searchExam').value || '').trim();
+    if(kw) list = list.filter(s=>(s.name||'').includes(kw));
+    list.sort((a,b)=>examTotal(b.exam)-examTotal(a.exam));
+
+    let totalAll = 0, passCnt = 0, excellentCnt = 0;
+    list.forEach(s=>{
+      const t = examTotal(s.exam);
+      totalAll += t;
+      if(t >= 60*6*0.6) passCnt++;
+      if(t >= 60*6*0.85) excellentCnt++;
+    });
+    if($('examStats')){
+      $('examStats').innerHTML = '当前人数: <b>'+list.length+'</b> &nbsp;|&nbsp; 均分: <b>'+
+        (list.length ? (totalAll/list.length).toFixed(1) : 0) +'</b> &nbsp;|&nbsp; 及格: <b>'+passCnt+
+        '</b> &nbsp;|&nbsp; 优秀: <b>'+excellentCnt+'</b>';
+    }
+
+    if(list.length === 0){
+      tbody.innerHTML = '<tr><td colspan="10"><div class="empty">暂无学生</div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = list.map((s,i)=>{
+      const e = s.exam;
+      const total = examTotal(e);
+      const rankStr = sub => (e[sub]||0)>0 ? '<span style="font-size:12px;color:#94a3b8;margin-left:4px">(第'+(rankDict[sub][s.id]||'-')+'名)</span>' : '';
+      const cls = v => (v<60 && v>0) ? 'text-red' : '';
+      const totalRank = totalRankDict[s.id];
+      const totalRankColor = (totalRank && totalRank<=3) ? '#d97706' : '#94a3b8';
+      const yearVal = (s.year === null || s.year === undefined || s.year === '') ? '-' : s.year;
+      return '<tr>' +
+        '<td onclick="setYearScore('+s.id+')" title="点击填写学年榜分数" style="cursor:pointer;color:#7c3aed;font-weight:700;background:#faf5ff">'+ yearVal +'</td>' +
+        '<td style="color:'+totalRankColor+'">'+ (totalRank || '-') +'</td>' +
+        '<td><b>'+ s.name +'</b></td>' +
+        '<td class="'+cls(e.ch)+'">'+ (e.ch||'-') +' '+rankStr('ch')+'</td>' +
+        '<td class="'+cls(e.ma)+'">'+ (e.ma||'-') +' '+rankStr('ma')+'</td>' +
+        '<td class="'+cls(e.en)+'">'+ (e.en||'-') +' '+rankStr('en')+'</td>' +
+        '<td class="'+cls(e.ph)+'">'+ (e.ph||'-') +' '+rankStr('ph')+'</td>' +
+        '<td class="'+cls(e.chm)+'">'+ (e.chm||'-') +' '+rankStr('chm')+'</td>' +
+        '<td class="'+cls(e.bio)+'">'+ (e.bio||'-') +' '+rankStr('bio')+'</td>' +
+        '<td><span class="score-num" style="font-size:16px">'+ (total||'-') +'</span></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  /* ---------- 小组详情弹窗 ---------- */
+  window.openGroupModal = function(groupName){
+    const members = students.filter(s=>(s.group || '未分组') === groupName).sort((a,b)=>(b.score||0)-(a.score||0));
+    const total = members.reduce((n,s)=>n+(s.score||0),0);
+    const avg = members.length ? (total/members.length).toFixed(1) : '0';
+
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>👥 '+ groupName +'</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div style="display:flex;gap:20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#64748b">' +
+          '<div>人数 <b style="color:#2563eb">'+ members.length +'</b></div>' +
+          '<div>总积分 <b style="color:#2563eb">'+ total +'</b></div>' +
+          '<div>人均 <b style="color:#10b981">'+ avg +'</b></div>' +
+        '</div>' +
+        (members.length === 0
+          ? '<div class="empty">该小组暂无成员</div>'
+          : members.map((s,i)=>{
+              const medal = i===0 ? '👑' : (i===1 ? '🥈' : (i===2 ? '🥉' : ''));
+              const rankPill = i===0
+                ? '<span style="display:inline-block;padding:1px 7px;border-radius:6px;background:#fef3c7;color:#b45309;font-size:11px;font-weight:700;margin-left:4px">第1名</span>'
+                : (i===1
+                  ? '<span style="display:inline-block;padding:1px 7px;border-radius:6px;background:#e2e8f0;color:#475569;font-size:11px;font-weight:700;margin-left:4px">第2名</span>'
+                  : (i===2
+                    ? '<span style="display:inline-block;padding:1px 7px;border-radius:6px;background:#ffedd5;color:#c2410c;font-size:11px;font-weight:700;margin-left:4px">第3名</span>'
+                    : '<span style="display:inline-block;padding:1px 7px;border-radius:6px;background:#f1f5f9;color:#94a3b8;font-size:11px;font-weight:600;margin-left:4px">第'+(i+1)+'名</span>'));
+              return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9">' +
+                '<div style="width:22px;color:#94a3b8;font-weight:600">'+ (i+1) +'</div>' +
+                '<div class="avatar" style="background:'+ groupColor(s.group) +'">'+ ((s.name||'?').charAt(0)) +'</div>' +
+                '<div style="flex:1;min-width:0">' +
+                  '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ s.name +' '+ medal + rankPill +'</div>' +
+                  '<div style="font-size:12px;color:#94a3b8">'+ (s.duty || '无职务') +'</div>' +
+                '</div>' +
+                '<div class="score-num" style="margin-right:6px">'+ (s.score||0) +'</div>' +
+                '<button class="act plus" onclick="openScoreModal('+s.id+',\'add\')">加分</button>' +
+                '<button class="act minus" onclick="openScoreModal('+s.id+',\'minus\')">减分</button>' +
+              '</div>';
+            }).join('')
+        ) +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCloseBtn">关闭</button></div>';
+
+    openModal();
+    $('mClose').onclick = $('mCloseBtn').onclick = closeModal;
+  };
+
+  /* ---------- 年级/学年榜：点击单元格填写 ---------- */
+  window.setYearScore = function(id){
+    const s = students.find(x=>x.id === id);
+    if(!s) return;
+    const cur = (s.year === null || s.year === undefined || s.year === '') ? '' : String(s.year);
+    uiPrompt('填写学年榜', '请输入【' + s.name + '】的学年榜分数（留空则清除）', cur, function(input){
+      const v = String(input || '').trim();
+      if(v === ''){
+        s.year = null;
+      }else{
+        const n = Number(v);
+        if(isNaN(n)){ toast('请输入数字'); return; }
+        s.year = n;
+      }
+      renderExam();
+      scheduleSave();
+      toast('已保存');
+    }, '例如 620');
+  };
+
+  function renderHomework(){
+    const board = $('hwBoard'); if(!board) return;
+    if(homeworks.length === 0){
+      board.innerHTML = '<div class="empty" style="grid-column:1/-1">暂无作业，点击右上角「+ 布置新作业」</div>';
+      return;
+    }
+    const colorOf = sub => sub==='语文' ? '#f87171' : sub==='数学' ? '#60a5fa' : sub==='英语' ? '#34d399' : sub==='物理' ? '#a78bfa' : sub==='化学' ? '#fbbf24' : '#94a3b8';
+    board.innerHTML = homeworks.map((h,i)=>{
+      return '<div class="hw-card" style="border-top:4px solid '+colorOf(h.subject)+'">' +
+        '<div class="hw-sub">'+ h.subject +'<span style="font-size:12px;color:#94a3b8;font-weight:500">'+ (h.date||'') +'</span></div>' +
+        '<div style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:12px;min-height:44px;white-space:pre-wrap">'+ (h.content||'') +'</div>' +
+        '<div style="position:absolute;bottom:12px;right:12px;font-size:12px;color:#ef4444;cursor:pointer" onclick="delHomework('+i+')">✖ 删除</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderShop(){
+    const grid = $('shopGrid'); if(!grid) return;
+    if($('redeemTip')) $('redeemTip').textContent = redeemLogs.length ? ('已完成 ' + redeemLogs.length + ' 次兑换') : '';
+    if(shopGoods.length === 0){
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1">暂无商品，点击上方「+ 添加奖品」</div>';
+      return;
+    }
+    grid.innerHTML = shopGoods.map((g,i)=>{
+      const soldOut = g.stock <= 0;
+      return '<div style="border:1px solid #e2e8f0;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">' +
+        '<div style="font-size:15px;font-weight:600">'+ g.name +'</div>' +
+        '<div style="font-size:13px;color:#64748b;display:flex;justify-content:space-between">' +
+          '<span style="color:#d97706;font-weight:700">'+ g.cost +' 积分</span><span>库存 '+ g.stock +'</span></div>' +
+        '<button style="height:36px;border-radius:8px;background:#eff6ff;color:#2563eb;font-weight:600;'+(soldOut?'opacity:.5;cursor:not-allowed;':'')+'" ' +
+          (soldOut ? 'disabled' : 'onclick="openRedeemModal('+i+')"') + '>兑换</button>' +
+        '<div style="display:flex;justify-content:flex-end;gap:12px;font-size:12px">' +
+          '<span style="color:#4f46e5;cursor:pointer" onclick="openEditGoods('+i+')">编辑</span>' +
+          '<span style="color:#ef4444;cursor:pointer" onclick="delGoods('+i+')">删除</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderFeeds(){
+    const box = $('allFeedsList'); if(!box) return;
+    const kw = ($('searchFeeds') && $('searchFeeds').value) ? $('searchFeeds').value.trim() : '';
+    let all = [];
+    students.forEach(s=>{
+      (s.logs||[]).forEach((l,idx)=>{
+        all.push({ sid:s.id, name:s.name, idx:idx, time:l.time, delta:l.delta, reason:l.reason, group:(s.group||'未分组') });
+      });
+    });
+    all.sort((a,b)=> new Date(a.time).getTime() - new Date(b.time).getTime());
+    all.reverse();
+
+    let show = all;
+    if(kw) show = all.filter(x=> (x.name||'').indexOf(kw)>=0 || (x.reason||'').indexOf(kw)>=0);
+    if($('feedsCount')) $('feedsCount').textContent = all.length;
+
+    if(show.length === 0){
+      box.innerHTML = '<div class="empty">' + (all.length === 0 ? '暂无动态' : '没有匹配的记录') + '</div>';
+      return;
+    }
+    box.innerHTML = show.slice(0,200).map(l=>
+      '<div class="hist-item">' +
+        '<div><div style="font-size:12px;color:#94a3b8">'+ l.time +' · '+ l.group +'</div>' +
+        '<div style="font-weight:500"><b style="color:#2563eb">'+ l.name +'</b> · '+ (l.reason||'') +'</div></div>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div class="h-num '+(l.delta>0?'up':(l.delta<0?'down':''))+'">'+ (l.delta>0?'+':'') + l.delta +'</div>' +
+          '<button class="act del" onclick="undoLog('+l.sid+','+l.idx+')">撤销</button>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  /* ================= 考勤（按日期归档） ================= */
+  function attDayGet(date, create){
+    let d = attendLogs.filter(function(x){ return String(x.date) === String(date); })[0];
+    if(!d && create){
+      d = { date: date, items: {} };
+      attendLogs.push(d);
+    }
+    return d || null;
+  }
+
+  function attStatusOf(stuId, date){
+    const d = attDayGet(date, false);
+    if(!d || !d.items) return null;
+    return d.items[stuId] || d.items[String(stuId)] || null;
+  }
+
+  function attSet(stuId, date, status, reason, type){
+    const d = attDayGet(date, true);
+    if(!d.items) d.items = {};
+    if(!status || status === '正常'){
+      delete d.items[stuId];
+    }else{
+      d.items[stuId] = { status: status, reason: reason || '', type: type || '' };
+    }
+    /* 当天状态同步到学生卡片上显示 */
+    if(String(date) === todayStr()){
+      const stu = students.find(function(x){ return String(x.id) === String(stuId); });
+      if(stu) stu.attend = (!status || status === '正常') ? '' : status;
+    }
+  }
+
+  function attStatOf(date){
+    const d = attDayGet(date, false);
+    const st = { total: students.length, normal: students.length, leave: 0, late: 0, early: 0, absent: 0 };
+    if(d && d.items){
+      Object.keys(d.items).forEach(function(k){
+        if(!students.some(function(x){ return String(x.id) === String(k); })) return;
+        const it = d.items[k];
+        if(!it || !it.status || it.status === '正常') return;
+        st.normal--;
+        if(it.status.indexOf('请假') >= 0) st.leave++;
+        else if(it.status === '迟到') st.late++;
+        else if(it.status === '早退') st.early++;
+        else if(it.status === '旷课') st.absent++;
+      });
+    }
+    return st;
+  }
+
+  function attStatCards(date){
+    const box = $('attStat'); if(!box) return;
+    const st = attStatOf(date);
+    const isToday = String(date) === todayStr();
+    const card = function(label, val, color){
+      return '<div style="flex:1;min-width:96px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px">' +
+        '<div style="font-size:12px;color:#94a3b8">' + label + '</div>' +
+        '<div style="font-size:19px;font-weight:800;color:' + color + '">' + val + '</div></div>';
+    };
+    box.innerHTML =
+      '<div style="flex:1;min-width:120px;background:' + (isToday?'#eff6ff':'#f8fafc') + ';border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px">' +
+        '<div style="font-size:12px;color:#94a3b8">' + (isToday ? '今天' : '查看日期') + '</div>' +
+        '<div style="font-size:15px;font-weight:800;color:#2563eb">' + date + '</div></div>' +
+      card('应到', st.total, '#1e293b') +
+      card('正常', st.normal, '#10b981') +
+      card('请假', st.leave, '#2563eb') +
+      card('迟到', st.late, '#f59e0b') +
+      card('早退', st.early, '#8b5cf6') +
+      card('旷课', st.absent, '#ef4444');
+  }
+
+  function renderAttHist(){
+    const tb = $('tbodyAttHist'); if(!tb) return;
+    const list = attendLogs.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0, 60);
+    if(list.length === 0){
+      tb.innerHTML = '<tr><td colspan="7"><div class="empty">还没有考勤归档，登记今天的考勤后会自动生成</div></td></tr>';
+      return;
+    }
+    tb.innerHTML = list.map(function(d){
+      const st = attStatOf(d.date);
+      return '<tr>' +
+        '<td style="font-weight:700">' + d.date + (String(d.date)===todayStr() ? ' <span style="font-size:11px;color:#2563eb">今天</span>' : '') + '</td>' +
+        '<td style="color:#10b981;font-weight:600">' + st.normal + '</td>' +
+        '<td style="color:#2563eb;font-weight:600">' + st.leave + '</td>' +
+        '<td style="color:#f59e0b;font-weight:600">' + st.late + '</td>' +
+        '<td style="color:#8b5cf6;font-weight:600">' + st.early + '</td>' +
+        '<td style="color:#ef4444;font-weight:600">' + st.absent + '</td>' +
+        '<td><button class="act plain" data-attview="' + d.date + '">查看</button></td></tr>';
+    }).join('');
+    tb.querySelectorAll('[data-attview]').forEach(function(btn){
+      btn.onclick = function(){
+        attendDate = btn.dataset.attview;
+        if($('attDate')) $('attDate').value = attendDate;
+        renderAttendance();
+        toast('已切换到 ' + attendDate + ' 的考勤');
+      };
+    });
+  }
+
+  function renderAttendance(){
+    const tbody = $('tbodyAttendance'); if(!tbody) return;
+    if(!attendDate) attendDate = todayStr();
+    if($('attDate')) $('attDate').value = attendDate;
+    attStatCards(attendDate);
+    if(students.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty">暂无学生</div></td></tr>';
+      renderAttHist();
+      return;
+    }
+    const isToday = String(attendDate) === todayStr();
+    tbody.innerHTML = students.map(s=>{
+      const rec = attStatusOf(s.id, attendDate);
+      const st = (rec && rec.status) ? rec.status : '正常';
+      const reason = (rec && rec.reason) ? rec.reason : '';
+      const color = st==='迟到' ? '#f59e0b' : (st.indexOf('请假')>=0 ? '#2563eb' : (st==='早退' ? '#8b5cf6' : (st==='旷课' ? '#ef4444' : '#10b981')));
+      return '<tr>' +
+        '<td><div class="name-cell"><div class="avatar" style="background:'+ groupColor(s.group) +'">'+ ((s.name||'?').charAt(0)) +'</div><span>'+ s.name +'</span></div></td>' +
+        '<td style="color:#64748b;font-size:13px">'+ (s.group || '未分组') +'</td>' +
+        '<td><span style="color:'+ color +';font-weight:700">'+ st +'</span></td>' +
+        '<td style="font-size:12.5px;color:#94a3b8;max-width:240px">'+ (reason ? String(reason).replace(/</g,'&lt;') : '—') +'</td>' +
+        '<td><div class="acts">' +
+          '<button class="act plain" onclick="setAttend('+s.id+',\'迟到\')">迟到</button>' +
+          '<button class="act plain" onclick="setAttend('+s.id+',\'早退\')">早退</button>' +
+          '<button class="act plain" onclick="setAttend('+s.id+',\'请假\')">请假</button>' +
+          '<button class="act plain" onclick="setAttend('+s.id+',\'旷课\')">旷课</button>' +
+          '<button class="act plain" onclick="setAttend('+s.id+',\'正常\')">正常</button>' +
+        '</div>' + (isToday ? '' : '<div style="font-size:11px;color:#f59e0b;margin-top:4px">历史日期，修改会覆盖当天记录</div>') +
+        '</td></tr>';
+    }).join('');
+    renderAttHist();
+  }
+
+  /* ================= 加减分弹窗 ================= */
+  window.openScoreModal = function(id, type){
+    const stu = students.find(x=>x.id === id);
+    if(!stu){ toast('学生不存在'); return; }
+
+    let isAdd = (type === 'add' || type === 'plus');
+
+    const reasonsAdd = ["按时交作业","课堂发言","作业优秀","成绩进步","互助讲题","课前预习","错题订正","主动提问","背诵过关","竞赛获奖","守纪自律","文明有礼","拾金上交","课间守序","安静自习","服从安排","值日到位","整理公物","主动保洁","垃圾分类","摆放桌椅","积极参赛","协助班级","好人好事","板报出力","志愿服务"];
+    const reasonsSub = ["迟交作业","缺交作业","课堂走神","扰乱课堂","抄袭作业","背诵未过","追逐打闹","出言不逊","迟到早退","无故旷课","乱扔杂物","喧哗吵闹","值日偷懒","卫生不合格","破坏公物","桌面脏乱","未带学具","弄虚作假"];
+
+    const tagHtml = t => '<span class="reason-tag" style="display:inline-block;padding:4px 10px;margin:4px;font-size:12.5px;border-radius:6px;background:#f1f5f9;color:#475569;cursor:pointer;border:1px solid transparent;">'+t+'</span>';
+
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3 id="scTitle">'+ (isAdd ? '+ 加分' : '- 减分') +'</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div style="margin-bottom:12px;font-size:14px;color:#64748b">学生：<b>'+ stu.name +'</b>（'+ (stu.group || '未分组') +' · 当前 '+ (stu.score||0) +' 分）</div>' +
+        '<div style="display:flex;gap:10px;margin-bottom:16px">' +
+          '<button id="opAdd" style="flex:1;height:40px;border-radius:8px;border:1px solid '+(isAdd?'#10b981':'#e2e8f0')+';background:'+(isAdd?'#ecfdf5':'#fff')+';color:'+(isAdd?'#10b981':'#475569')+';font-weight:600">+ 加分</button>' +
+          '<button id="opSub" style="flex:1;height:40px;border-radius:8px;border:1px solid '+(!isAdd?'#ef4444':'#e2e8f0')+';background:'+(!isAdd?'#fef2f2':'#fff')+';color:'+(!isAdd?'#ef4444':'#475569')+';font-weight:600">- 减分</button>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">' +
+          [1,2,3,5,10,20,50,100].map(v=>'<button class="quick" data-v="'+v+'" style="height:36px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#0f172a">'+v+'</button>').join('') +
+        '</div>' +
+        '<input type="number" id="scVal" placeholder="输入自定义分数" style="width:100%;height:40px;border:1px solid #e2e8f0;border-radius:8px;padding:0 12px;margin-bottom:16px;font-size:15px">' +
+        '<div style="max-height:120px;overflow-y:auto;margin-bottom:12px;padding:4px;border:1px dashed #e2e8f0;border-radius:8px" id="reasonTags">' +
+          (isAdd ? reasonsAdd : reasonsSub).map(tagHtml).join('') +
+        '</div>' +
+        '<textarea id="scReason" placeholder="原因（必填，可点上方标签自动填入）" style="width:100%;height:60px;border:1px solid #e2e8f0;border-radius:8px;padding:10px;resize:none;font-size:15px"></textarea>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确认</button></div>';
+
+    openModal();
+    const textArea = $('scReason');
+
+    function bindTags(){
+      const tags = box.querySelectorAll('.reason-tag');
+      tags.forEach(tag=>{
+        tag.onclick = function(){
+          tags.forEach(t=>{ t.style.background='#f1f5f9'; t.style.color='#475569'; t.style.borderColor='transparent'; });
+          this.style.background = isAdd ? '#ecfdf5' : '#fef2f2';
+          this.style.color = isAdd ? '#10b981' : '#ef4444';
+          this.style.borderColor = isAdd ? '#10b981' : '#ef4444';
+          textArea.value = this.innerText;
+        };
+      });
+    }
+    bindTags();
+
+    $('opAdd').onclick = function(){
+      isAdd = true;
+      $('scTitle').textContent = '+ 加分';
+      this.style.cssText = 'flex:1;height:40px;border-radius:8px;border:1px solid #10b981;background:#ecfdf5;color:#10b981;font-weight:600';
+      $('opSub').style.cssText = 'flex:1;height:40px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#475569;font-weight:600';
+      $('reasonTags').innerHTML = reasonsAdd.map(tagHtml).join('');
+      bindTags();
+    };
+    $('opSub').onclick = function(){
+      isAdd = false;
+      $('scTitle').textContent = '- 减分';
+      this.style.cssText = 'flex:1;height:40px;border-radius:8px;border:1px solid #ef4444;background:#fef2f2;color:#ef4444;font-weight:600';
+      $('opAdd').style.cssText = 'flex:1;height:40px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#475569;font-weight:600';
+      $('reasonTags').innerHTML = reasonsSub.map(tagHtml).join('');
+      bindTags();
+    };
+
+    box.querySelectorAll('.quick').forEach(btn=>{
+      btn.onclick = function(){
+        box.querySelectorAll('.quick').forEach(b=>{ b.style.background='#fff'; b.style.color='#0f172a'; });
+        this.style.background = isAdd ? '#eff6ff' : '#fef2f2';
+        this.style.color = isAdd ? '#2563eb' : '#ef4444';
+        $('scVal').value = this.dataset.v;
+      };
+    });
+
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const val = Math.abs(Number($('scVal').value));
+      const reason = $('scReason').value.trim();
+      if(!val){ toast('请输入分数'); return; }
+      if(!reason){ toast('请填写原因'); return; }
+      const finalVal = isAdd ? val : -val;
+      stu.score = (stu.score||0) + finalVal;
+      if(!stu.logs) stu.logs = [];
+      stu.logs.push({ time: nowStr(), delta: finalVal, reason: reason });
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast((isAdd?'加分':'减分') + '成功');
+    };
+  };
+
+  /* ================= 历史记录 ================= */
+  window.openHistoryModal = function(id){
+    const stu = students.find(x=>x.id === id);
+    if(!stu) return;
+    const logs = [...(stu.logs||[])].reverse();
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>'+ stu.name +' · 积分历史</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd"><div class="hist-list">' +
+        (logs.length===0 ? '<div class="empty">暂无记录</div>' : logs.map(l=>
+          '<div class="hist-item"><div><div style="font-size:12px;color:#94a3b8">'+ l.time +'</div>' +
+          '<div style="font-weight:500">'+ (l.reason||'') +'</div></div>' +
+          '<div class="h-num '+(l.delta>0?'up':(l.delta<0?'down':''))+'">'+ (l.delta>0?'+':'') + l.delta +'</div></div>'
+        ).join('')) +
+      '</div></div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCloseBtn">关闭</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCloseBtn').onclick = closeModal;
+  };
+
+  /* ================= 编辑学生 ================= */
+  window.openEditStudent = function(id){
+    const s = students.find(x=>x.id === id);
+    if(!s){ toast('学生不存在'); return; }
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>编辑学生信息</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>姓名</label><input id="edName" value="'+ (s.name||'').replace(/"/g,'&quot;') +'"></div>' +
+        '<div class="f"><label>性别</label>'+ genderPillsHtml(s.gender || '') +'</div>' +
+        '<div class="f"><label>小组</label>'+ pickFieldHtml('edGroup', s.group || '未分组', s.group && s.group !== '__custom__' ? s.group : '') +
+          '<input id="edGroupCustom" class="hidden" placeholder="输入自定义小组名称" style="margin-top:8px"></div>' +
+        '<div class="f"><label>职务</label>'+ pickFieldHtml('edDuty', s.duty || '无职务', s.duty || '') +
+          '<input id="edDutyCustom" class="hidden" placeholder="输入自定义职务" style="margin-top:8px"></div>' +
+        '<div class="f"><label>积分（手动修正，会生成一条记录）</label><input id="edScore" type="number" value="'+ (s.score||0) +'"></div>' +
+        '<div style="font-size:12.5px;color:#94a3b8">已产生 ' + ((s.logs||[]).length) + ' 条加减分记录</div>' +
+      '</div>' +
+      '<div class="m-ft" style="justify-content:space-between">' +
+        '<button class="btn-line btn-danger" id="edDel" style="margin-right:auto">删除该学生</button>' +
+        '<button class="btn-line" id="mCancel">取消</button>' +
+        '<button class="btn-solid" id="mSave">保存</button>' +
+      '</div>';
+    openModal();
+    bindFormControls(box);
+    setupPickField('edGroupBtn', 'edGroup', '选择小组', groupPickItems, function(v){
+      const cus = $('edGroupCustom');
+      if(!cus) return;
+      cus.classList.toggle('hidden', v !== '__custom__');
+      if(v === '__custom__') cus.focus();
+    });
+    setupPickField('edDutyBtn', 'edDuty', '选择职务', dutyPickItems, function(v){
+      const cus = $('edDutyCustom');
+      if(!cus) return;
+      cus.classList.toggle('hidden', v !== '__custom__');
+      if(v === '__custom__') cus.focus();
+    });
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+
+    $('mSave').onclick = function(){
+      const name = ($('edName').value || '').trim();
+      if(!name){ toast('姓名不能为空'); return; }
+      const newScore = Number($('edScore').value);
+      const oldScore = (s.score||0);
+      const gv = $('edGroup').value;
+      const dv = $('edDuty').value;
+      s.name = name;
+      s.group = (gv === '__custom__' ? ($('edGroupCustom').value || '').trim() : gv);
+      s.gender = readGender(box);
+      s.duty = (dv === '__custom__' ? ($('edDutyCustom').value || '').trim() : dv);
+      if(!isNaN(newScore) && newScore !== oldScore){
+        if(!s.logs) s.logs = [];
+        s.logs.push({ time: nowStr(), delta: newScore - oldScore, reason: '手动修正积分：' + oldScore + ' → ' + newScore });
+        s.score = newScore;
+      }
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('已保存');
+    };
+
+    $('edDel').onclick = function(){
+      uiConfirm('删除学生', '确定删除学生【' + s.name + '】？\n该学生的所有加减分记录也会一并删除，且不可恢复。', function(){
+        students = students.filter(x=>x.id !== s.id);
+        closeModal();
+        renderAll();
+        scheduleSave();
+        toast('已删除');
+      }, '删除');
+    };
+  };
+
+  /* ================= 撤销记录 ================= */
+  window.undoLog = function(sid, idx){
+    const stu = students.find(x=>x.id === sid);
+    if(!stu || !stu.logs || !stu.logs[idx]){ toast('记录不存在'); return; }
+    const l = stu.logs[idx];
+    const tip = l.delta === 0 ? '这条考勤记录将被删除' : ('将回退 ' + (l.delta>0?'+':'') + l.delta + ' 分');
+    uiConfirm('撤销记录', '撤销【' + (l.reason || '未注明') + '】？\n' + tip, function(){
+      stu.score = (stu.score||0) - (l.delta||0);
+      stu.logs.splice(idx, 1);
+      renderAll();
+      scheduleSave();
+      toast('已撤销');
+    }, '撤销');
+  };
+
+  /* ================= 新增学生 ================= */
+  $('btnOpenAddStu').onclick = function(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>新增学生</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>学生姓名</label><input id="inName" placeholder="姓名"></div>' +
+        '<div class="f"><label>性别</label>'+ genderPillsHtml('') +'</div>' +
+        '<div class="f"><label>小组</label>'+ pickFieldHtml('inGroup', '未分组', '') +
+          '<input id="inGroupCustom" class="hidden" placeholder="输入自定义小组名称，如：火箭组" style="margin-top:8px"></div>' +
+        '<div class="f"><label>职务</label>'+ pickFieldHtml('inDuty', '无职务', '') +
+          '<input id="inDutyCustom" class="hidden" placeholder="输入自定义职务，如：电教管理员" style="margin-top:8px"></div>' +
+        '<div class="f"><label>初始积分</label><input id="inScore" type="number" value="0"></div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">添加</button></div>';
+    openModal();
+    bindFormControls(box);
+    setupPickField('inGroupBtn', 'inGroup', '选择小组', groupPickItems, function(v){
+      const cus = $('inGroupCustom');
+      if(!cus) return;
+      cus.classList.toggle('hidden', v !== '__custom__');
+      if(v === '__custom__') cus.focus();
+    });
+    setupPickField('inDutyBtn', 'inDuty', '选择职务', dutyPickItems, function(v){
+      const cus = $('inDutyCustom');
+      if(!cus) return;
+      cus.classList.toggle('hidden', v !== '__custom__');
+      if(v === '__custom__') cus.focus();
+    });
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const name = ($('inName').value || '').trim();
+      if(!name){ toast('请填写姓名'); return; }
+      const gv = $('inGroup').value;
+      const group = (gv === '__custom__' ? ($('inGroupCustom').value || '').trim() : gv);
+      const dv = $('inDuty').value;
+      const duty = (dv === '__custom__' ? ($('inDutyCustom').value || '').trim() : dv);
+      students.push({
+        id: Date.now(),
+        name: name,
+        group: group,
+        gender: readGender(box),
+        duty: duty,
+        score: Number($('inScore').value) || 0,
+        logs: [],
+        exam: { ch:0, ma:0, en:0, ph:0, chm:0, bio:0 },
+        attend: '',
+        year: null
+      });
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('已添加 ' + name);
+    };
+  };
+
+  /* ================= 成绩录入 ================= */
+  $('btnAddExam').onclick = function(){
+    if(students.length === 0){ toast('请先添加学生'); return; }
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>录入 / 修改成绩</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>选择学生</label>'+ pickFieldHtml('exStu', (students[0]||{}).name || '请选择', students.length ? String(students[0].id) : '') +'</div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>语文</label><input id="exCh" type="number" placeholder="0"></div>' +
+          '<div class="f" style="flex:1"><label>数学</label><input id="exMa" type="number" placeholder="0"></div>' +
+          '<div class="f" style="flex:1"><label>英语</label><input id="exEn" type="number" placeholder="0"></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>物理</label><input id="exPh" type="number" placeholder="0"></div>' +
+          '<div class="f" style="flex:1"><label>化学</label><input id="exChm" type="number" placeholder="0"></div>' +
+          '<div class="f" style="flex:1"><label>生物</label><input id="exBio" type="number" placeholder="0"></div>' +
+        '</div>' +
+        '<div class="f"><label>学年榜（可不填）</label><input id="exYear" type="number" placeholder="学年榜分数"></div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">保存</button></div>';
+    openModal();
+
+    function fill(){
+      const s = students.find(x=>x.id === Number($('exStu').value));
+      if(!s) return;
+      if(!s.exam) s.exam = { ch:0, ma:0, en:0, ph:0, chm:0, bio:0 };
+      $('exCh').value = s.exam.ch || '';
+      $('exMa').value = s.exam.ma || '';
+      $('exEn').value = s.exam.en || '';
+      $('exPh').value = s.exam.ph || '';
+      $('exChm').value = s.exam.chm || '';
+      $('exBio').value = s.exam.bio || '';
+      $('exYear').value = (s.year === null || s.year === undefined || s.year === '') ? '' : s.year;
+    }
+    setupPickField('exStuBtn', 'exStu', '选择学生', function(){
+      return students.map(s=>({ value:String(s.id), label:s.name + '（' + (s.group || '未分组') + '）' }));
+    }, function(){ fill(); });
+    fill();
+
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const s = students.find(x=>x.id === Number($('exStu').value));
+      if(!s){ toast('学生不存在'); return; }
+      s.exam = {
+        ch: Number($('exCh').value) || 0,
+        ma: Number($('exMa').value) || 0,
+        en: Number($('exEn').value) || 0,
+        ph: Number($('exPh').value) || 0,
+        chm: Number($('exChm').value) || 0,
+        bio: Number($('exBio').value) || 0
+      };
+      const yv = ($('exYear').value || '').trim();
+      s.year = yv === '' ? null : Number(yv);
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('成绩已保存');
+    };
+  };
+
+  /* ================= 作业 ================= */
+  window.delHomework = function(idx){
+    if(!homeworks[idx]) return;
+    uiConfirm('删除作业', '确定删除这项作业？', function(){
+      homeworks.splice(idx, 1);
+      renderHomework();
+      scheduleSave();
+      toast('已删除');
+    }, '删除');
+  };
+
+  $('btnAddHomework').onclick = function(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>布置作业</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>学科</label>'+ pickFieldHtml('hwSub', '语文', '语文') +'</div>' +
+          '<div class="f" style="flex:1"><label>日期</label><input id="hwDate" type="text" placeholder="2026-11-17"></div>' +
+        '</div>' +
+        '<div class="f"><label>内容</label><textarea id="hwCon" placeholder="作业内容" style="width:100%;height:80px;border:1px solid #e2e8f0;border-radius:8px;padding:10px;resize:none;font-size:15px"></textarea></div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">布置</button></div>';
+    openModal();
+    setupPickField('hwSubBtn', 'hwSub', '选择学科', function(){
+      return ['语文','数学','英语','物理','化学','生物'].map(v=>({ value:v, label:v }));
+    });
+    const d = new Date();
+    $('hwDate').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const content = ($('hwCon').value || '').trim();
+      if(!content){ toast('请填写作业内容'); return; }
+      const dv = parseDateInput($('hwDate').value);
+      homeworks.unshift({ date: dv ? fmtDateInput(dv) : ($('hwDate').value || ''), subject: $('hwSub').value, content: content });
+      closeModal();
+      renderHomework();
+      scheduleSave();
+      toast('已布置');
+    };
+  };
+
+  /* ================= 商城 ================= */
+  $('btnAddGoods').onclick = function(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>添加奖品</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>奖品名称</label><input id="gdName" placeholder="奖品名"></div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>消耗积分</label><input id="gdCost" type="number" value="50"></div>' +
+          '<div class="f" style="flex:1"><label>库存</label><input id="gdStock" type="number" value="10"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">添加</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const name = ($('gdName').value || '').trim();
+      const cost = Number($('gdCost').value);
+      const stock = Number($('gdStock').value);
+      if(!name){ toast('请填写奖品名称'); return; }
+      if(!cost || cost <= 0){ toast('请填写正确的积分'); return; }
+      if(isNaN(stock) || stock < 0){ toast('请填写正确的库存'); return; }
+      shopGoods.push({ name: name, cost: cost, stock: stock });
+      closeModal();
+      renderShop();
+      scheduleSave();
+      toast('已添加');
+    };
+  };
+
+  window.openEditGoods = function(idx){
+    const g = shopGoods[idx]; if(!g) return;
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>编辑奖品</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>奖品名称</label><input id="egName" value="'+ (g.name||'').replace(/"/g,'&quot;') +'"></div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>消耗积分</label><input id="egCost" type="number" value="'+ (g.cost||0) +'"></div>' +
+          '<div class="f" style="flex:1"><label>库存</label><input id="egStock" type="number" value="'+ (g.stock||0) +'"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">保存</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const name = ($('egName').value || '').trim();
+      if(!name){ toast('名称不能为空'); return; }
+      g.name = name;
+      g.cost = Number($('egCost').value) || 0;
+      g.stock = Number($('egStock').value) || 0;
+      closeModal();
+      renderShop();
+      scheduleSave();
+      toast('已保存');
+    };
+  };
+
+  window.delGoods = function(idx){
+    if(!shopGoods[idx]) return;
+    uiConfirm('删除奖品', '删除奖品【' + shopGoods[idx].name + '】？', function(){
+      shopGoods.splice(idx, 1);
+      renderShop();
+      scheduleSave();
+      toast('已删除');
+    }, '删除');
+  };
+
+  window.openRedeemModal = function(idx){
+    const goods = shopGoods[idx];
+    if(!goods) return;
+    const sorted = [...students].sort((a,b)=>(b.score||0)-(a.score||0));
+    if(sorted.length === 0){ toast('还没有学生'); return; }
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>兑换：'+ goods.name +'</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>选择学生（消耗 '+ goods.cost +' 积分）</label>' +
+          pickFieldHtml('rdStu', sorted[0].name + '（' + (sorted[0].score||0) + '分）', String(sorted[0].id)) +
+        '</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确认兑换</button></div>';
+    openModal();
+    setupPickField('rdStuBtn', 'rdStu', '选择学生', function(){
+      return sorted.map(s=>({
+        value:String(s.id),
+        label: s.name + '（' + (s.score||0) + '分）' + ((s.score||0) < goods.cost ? ' · 积分不足' : ''),
+        dis: (s.score||0) < goods.cost
+      }));
+    });
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const stu = students.find(s=>s.id === Number($('rdStu').value));
+      if(!stu){ toast('请选择学生'); return; }
+      if((stu.score||0) < goods.cost){ toast('积分不足'); return; }
+      stu.score -= goods.cost;
+      if(!stu.logs) stu.logs = [];
+      stu.logs.push({ time: nowStr(), delta: -goods.cost, reason: '兑换：' + goods.name });
+      goods.stock = Math.max(0, goods.stock - 1);
+      redeemLogs.unshift({ time: nowStr(), name: stu.name, goods: goods.name, cost: goods.cost });
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('兑换成功');
+    };
+  };
+
+  /* ================= 考勤 ================= */
+  function openLeaveModal(stu){
+    const today = new Date();
+    const defDate = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>请假登记</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+          '<div class="avatar" style="background:'+ groupColor(stu.group) +'">'+ ((stu.name||'?').charAt(0)) +'</div>' +
+          '<div><div style="font-weight:700;font-size:15px">'+ stu.name +'</div>' +
+          '<div style="font-size:12.5px;color:#94a3b8">'+ (stu.group || '未分组') +' · '+ (stu.duty || '无职务') +'</div></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>请假类型</label>'+ pickFieldHtml('lvType', '事假', '事假') +'</div>' +
+          '<div class="f" style="flex:1"><label>请假日期</label><input id="lvDate" type="text" value="'+ defDate +'" placeholder="2026-11-17"></div>' +
+        '</div>' +
+        '<div class="f"><label>请假理由（必填）</label>' +
+          '<textarea id="lvReason" placeholder="例如：发烧 38.5 度，需在家休息一天" style="width:100%;height:80px;border:1px solid #e2e8f0;border-radius:8px;padding:10px;resize:none;font-size:15px"></textarea>' +
+        '</div>' +
+        '<div style="font-size:12.5px;color:#94a3b8">请假不扣积分，但会在记录与考勤状态中留存理由</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确认请假</button></div>';
+    openModal();
+    setupPickField('lvTypeBtn', 'lvType', '请假类型', function(){
+      return ['事假','病假','公假','其他'].map(v=>({ value:v, label:v }));
+    });
+
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const reason = ($('lvReason').value || '').trim();
+      if(!reason){ toast('请假理由必须填写'); return; }
+      const type = $('lvType').value || '事假';
+      const dv2 = parseDateInput($('lvDate').value);
+      const date = dv2 ? fmtDateInput(dv2) : ($('lvDate').value || defDate);
+      attSet(stu.id, date, '请假(' + type + ')', reason, type);
+      if(String(date) === todayStr()) attendDate = date;
+      if(!stu.logs) stu.logs = [];
+      stu.logs.push({ time: nowStr(), delta: 0, reason: '考勤：请假（' + type + '，' + date + '）— ' + reason });
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('已登记 ' + date + ' 请假');
+    };
+  }
+
+  window.setAttend = function(id, status){
+    const stu = students.find(s=>s.id === id);
+    if(!stu) return;
+
+    if(status === '请假'){
+      openLeaveModal(stu);
+      return;
+    }
+
+    if(status === '旷课'){
+      const box = $('modalBox');
+      box.innerHTML =
+        '<div class="m-hd"><h3>登记旷课</h3><button class="m-close" id="mClose">×</button></div>' +
+        '<div class="m-bd">' +
+          '<div style="font-size:14px;color:#64748b;margin-bottom:12px">学生：<b>'+ stu.name +'</b>（旷课将扣除 4 分）</div>' +
+          '<div class="f"><label>旷课原因（必填）</label><input id="abReason" placeholder="例如：无故未到校"></div>' +
+        '</div>' +
+        '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确认</button></div>';
+      openModal();
+      $('mClose').onclick = $('mCancel').onclick = closeModal;
+      $('mSave').onclick = function(){
+        const reason = ($('abReason').value || '').trim();
+        if(!reason){ toast('请填写旷课原因'); return; }
+        attSet(stu.id, attendDate, '旷课', reason, '');
+        stu.score = (stu.score||0) - 4;
+        if(!stu.logs) stu.logs = [];
+        stu.logs.push({ time: nowStr(), delta: -4, reason: '考勤：旷课（' + attendDate + '）— ' + reason });
+        closeModal();
+        renderAll();
+        scheduleSave();
+        toast('已登记 ' + attendDate + ' 旷课');
+      };
+      return;
+    }
+
+    if(status === '早退'){
+      const box = $('modalBox');
+      box.innerHTML =
+        '<div class="m-hd"><h3>登记早退</h3><button class="m-close" id="mClose">×</button></div>' +
+        '<div class="m-bd">' +
+          '<div style="font-size:14px;color:#64748b;margin-bottom:12px">学生：<b>'+ stu.name +'</b>（早退将扣除 1 分）</div>' +
+          '<div class="f"><label>早退原因（必填）</label><input id="leReason" placeholder="例如：身体不适提前回家"></div>' +
+        '</div>' +
+        '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确认</button></div>';
+      openModal();
+      $('mClose').onclick = $('mCancel').onclick = closeModal;
+      $('mSave').onclick = function(){
+        const reason = ($('leReason').value || '').trim();
+        if(!reason){ toast('请填写早退原因'); return; }
+        attSet(stu.id, attendDate, '早退', reason, '');
+        stu.score = (stu.score||0) - 1;
+        if(!stu.logs) stu.logs = [];
+        stu.logs.push({ time: nowStr(), delta: -1, reason: '考勤：早退（' + attendDate + '）— ' + reason });
+        closeModal();
+        renderAll();
+        scheduleSave();
+        toast('已登记 ' + attendDate + ' 早退');
+      };
+      return;
+    }
+
+    if(status === '迟到'){
+      const box = $('modalBox');
+      box.innerHTML =
+        '<div class="m-hd"><h3>登记迟到</h3><button class="m-close" id="mClose">×</button></div>' +
+        '<div class="m-bd">' +
+          '<div style="font-size:14px;color:#64748b;margin-bottom:12px">学生：<b>'+ stu.name +'</b>（迟到将扣除 2 分）</div>' +
+          '<div class="f"><label>迟到原因（必填）</label><input id="ltReason" placeholder="例如：路上堵车 / 起晚了"></div>' +
+        '</div>' +
+        '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确认</button></div>';
+      openModal();
+      $('mClose').onclick = $('mCancel').onclick = closeModal;
+      $('mSave').onclick = function(){
+        const reason = ($('ltReason').value || '').trim();
+        if(!reason){ toast('请填写迟到原因'); return; }
+        attSet(stu.id, attendDate, '迟到', reason, '');
+        stu.score = (stu.score||0) - 2;
+        if(!stu.logs) stu.logs = [];
+        stu.logs.push({ time: nowStr(), delta: -2, reason: '考勤：迟到（' + attendDate + '）— ' + reason });
+        closeModal();
+        renderAll();
+        scheduleSave();
+        toast('已登记 ' + attendDate + ' 迟到');
+      };
+      return;
+    }
+
+    attSet(stu.id, attendDate, '正常', '', '');
+    renderAll();
+    scheduleSave();
+  };
+
+  $('btnAllNormal').onclick = function(){
+    if(students.length === 0){ toast('还没有学生'); return; }
+    const d = attDayGet(attendDate, true);
+    d.items = {};
+    if(String(attendDate) === todayStr()) students.forEach(function(s){ s.attend = ''; });
+    renderAll();
+    scheduleSave();
+    toast('已把 ' + attendDate + ' 全部设为正常');
+  };
+
+  /* 导出考勤（Excel） */
+  if($('btnExpAtt')){
+    $('btnExpAtt').onclick = function(){
+      if(attendLogs.length === 0){ toast('还没有考勤记录'); return; }
+      const sum = [['日期','应到','正常','请假','迟到','早退','旷课','请假/异常名单']];
+      const det = [['日期','姓名','小组','状态','理由']];
+      attendLogs.slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); }).forEach(function(d){
+        const st = attStatOf(d.date);
+        const names = [];
+        Object.keys(d.items || {}).forEach(function(k){
+          const stu = students.find(function(x){ return String(x.id) === String(k); });
+          if(!stu) return;
+          const it = d.items[k];
+          if(!it || !it.status || it.status === '正常') return;
+          names.push(stu.name + '(' + it.status + ')');
+        });
+        sum.push([d.date, st.total, st.normal, st.leave, st.late, st.early, st.absent, names.join('、')]);
+        Object.keys(d.items || {}).forEach(function(k){
+          const stu = students.find(function(x){ return String(x.id) === String(k); });
+          if(!stu) return;
+          const it = d.items[k];
+          if(!it || !it.status || it.status === '正常') return;
+          det.push([d.date, stu.name, stu.group || '未分组', it.status, it.reason || '']);
+        });
+      });
+      downloadXlsx([{ name:'考勤汇总', rows: sum }, { name:'考勤明细', rows: det }], '班级考勤_' + (attendDate || todayStr()));
+      toast('已导出考勤 Excel');
+    };
+  }
+
+  /* 日期切换 */
+  function shiftAttDate(days){
+    const ts = parseDateInput(attendDate) || Date.now();
+    attendDate = fmtDateInput(ts + days * 86400000);
+    renderAttendance();
+  }
+  if($('attPrev')) $('attPrev').onclick = function(){ shiftAttDate(-1); };
+  if($('attNext')) $('attNext').onclick = function(){ shiftAttDate(1); };
+  if($('attToday')) $('attToday').onclick = function(){ attendDate = todayStr(); renderAttendance(); };
+  if($('attDate')) $('attDate').onchange = function(){
+    const ts = parseDateInput($('attDate').value);
+    if(!ts){ toast('日期格式不对，用 2026-11-17 这种写法'); $('attDate').value = attendDate; return; }
+    attendDate = fmtDateInput(ts);
+    renderAttendance();
+  };
+
+  /* ================= 搜索 & 标签切换 ================= */
+  $('searchStu').addEventListener('input', renderStudentList);
+  $('searchExam').addEventListener('input', renderExam);
+  $('searchFeeds').addEventListener('input', renderFeeds);
+
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+      this.classList.add('on');
+      document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+      const target = $('panel-' + this.dataset.tab);
+      if(target) target.classList.remove('hidden');
+    });
+  });
+
+  /* ================= 全屏计时器 ================= */
+  $('btnTimer').onclick = function(){
+    if($('timerOverlay')) return;
+    const div = document.createElement('div');
+    div.className = 'timer-overlay';
+    div.id = 'timerOverlay';
+    div.innerHTML =
+      '<div style="text-align:center;padding:0 16px">' +
+        '<div class="timer-time" id="timerDisp">15:00</div>' +
+        '<div style="margin-bottom:30px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
+          [1,3,5,15,40,45].map(m=>'<button class="timer-btn" data-min="'+m+'">'+m+' 分钟</button>').join('') +
+        '</div>' +
+        '<div style="display:flex;justify-content:center;gap:20px">' +
+          '<button class="timer-btn" id="tStart" style="background:#2563eb;color:#fff">开始</button>' +
+          '<button class="timer-btn" id="tClose">关闭</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(div);
+
+    let time = 15 * 60, tick = null, isRunning = false;
+    const disp = $('timerDisp');
+
+    function update(){
+      const m = String(Math.floor(time/60)).padStart(2,'0');
+      const s = String(time%60).padStart(2,'0');
+      disp.textContent = m + ':' + s;
+    }
+
+    div.querySelectorAll('[data-min]').forEach(btn=>{
+      btn.onclick = function(){
+        if(isRunning) return;
+        time = parseInt(this.dataset.min, 10) * 60;
+        update();
+        div.querySelectorAll('[data-min]').forEach(b=>{ b.style.background='#f1f5f9'; b.style.color='#475569'; });
+        this.style.background = '#e0f2fe';
+        this.style.color = '#0284c7';
+      };
+    });
+
+    $('tStart').onclick = function(){
+      if(isRunning){
+        clearInterval(tick);
+        isRunning = false;
+        this.textContent = '继续';
+        return;
+      }
+      isRunning = true;
+      this.textContent = '暂停';
+      tick = setInterval(()=>{
+        if(time <= 0){
+          clearInterval(tick);
+          isRunning = false;
+          disp.textContent = '00:00';
+          disp.style.color = '#ef4444';
+          toast('⏰ 时间到！');
+          return;
+        }
+        time--;
+        update();
+      }, 1000);
+    };
+
+    $('tClose').onclick = function(){
+      clearInterval(tick);
+      div.remove();
+    };
+
+    update();
+  };
+
+  /* ================= 随机抽人 ================= */
+  $('btnLucky').onclick = function(){
+    if(students.length === 0){ toast('还没有学生哦'); return; }
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd" style="justify-content:center;padding-top:24px"><h3 style="font-size:20px;color:#2563eb">🎲 随机抽人</h3></div>' +
+      '<div class="m-bd" style="text-align:center;padding:40px 20px">' +
+        '<div id="luckyName" style="font-size:42px;font-weight:800;color:#2563eb;margin-bottom:20px">准备...</div>' +
+        '<button class="btn-solid" id="btnStartLucky" style="font-size:18px;height:48px;border-radius:24px">开始</button>' +
+        '<button class="btn-solid" id="btnStopLucky" style="display:none;font-size:18px;height:48px;background:#ef4444;border-radius:24px">停止</button>' +
+      '</div>';
+    openModal();
+
+    let rolling = null;
+    const nameEl = $('luckyName');
+
+    $('btnStartLucky').onclick = function(){
+      this.style.display = 'none';
+      $('btnStopLucky').style.display = 'inline-block';
+      nameEl.style.color = '#2563eb';
+      rolling = setInterval(()=>{
+        nameEl.textContent = students[Math.floor(Math.random()*students.length)].name;
+      }, 50);
+    };
+
+    $('btnStopLucky').onclick = function(){
+      clearInterval(rolling);
+      this.style.display = 'none';
+      const lucky = students[Math.floor(Math.random()*students.length)];
+      nameEl.textContent = lucky.name;
+      nameEl.style.color = '#e0454c';
+      setTimeout(()=>{
+        closeModal();
+        openScoreModal(lucky.id, 'add');
+      }, 900);
+    };
+  };
+
+  /* ================= 批量加减 ================= */
+  $('btnBatchStu').onclick = function(){
+    if(students.length === 0){ toast('还没有学生'); return; }
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>批量加减（全班）</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>分值（正数加分，负数减分）</label><input id="btScore" type="number" value="1"></div>' +
+        '<div class="f"><label>原因</label><input id="btReason" placeholder="如：全勤、班会表现"></div>' +
+        '<div style="font-size:13px;color:#94a3b8">将作用于全部 '+ students.length +' 名学生</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">确定</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const val = Number($('btScore').value);
+      const reason = ($('btReason').value || '').trim();
+      if(!val){ toast('请输入分值'); return; }
+      if(!reason){ toast('请填写原因'); return; }
+      students.forEach(s=>{
+        s.score = (s.score||0) + val;
+        if(!s.logs) s.logs = [];
+        s.logs.push({ time: nowStr(), delta: val, reason: reason });
+      });
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('批量操作完成');
+    };
+  };
+
+  /* ================= 班级公告 ================= */
+  $('btnNotice').onclick = function(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>班级公告</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>公告内容（保存后显示在学生榜顶部，留空则隐藏）</label><textarea id="ntText" style="width:100%;height:120px;border:1px solid #e2e8f0;border-radius:8px;padding:10px;resize:none;font-size:15px" placeholder="输入要发布的班级公告"></textarea></div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mClear">清空</button><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">保存公告</button></div>';
+    openModal();
+    $('ntText').value = notices || '';
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mClear').onclick = function(){ $('ntText').value = ''; };
+    $('mSave').onclick = function(){
+      notices = ($('ntText').value || '').trim();
+      closeModal();
+      renderNotice();
+      scheduleSave();
+      toast('公告已保存');
+    };
+  };
+
+  /* ================= 云端接口自检 ================= */
+  async function probeApi(domain, service, params){
+    const body = new URLSearchParams();
+    body.append('app_key', CONFIG.APP_KEY);
+    body.append('yesapi_allow_origin', '1');
+    body.append('format', 'json');
+    for(const k in params) body.append(k, typeof params[k] === 'string' ? params[k] : JSON.stringify(params[k]));
+    const url = domain + '?s=' + service + '&yesapi_allow_origin=1&format=json';
+    try{
+      const res = await withTimeout(fetch(url, {
+        method: 'POST', body: body, mode: 'cors', credentials: 'omit', cache: 'no-store',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
+      }), 9000);
+      const txt = await res.text();
+      return 'HTTP ' + res.status + ' → ' + String(txt || '').slice(0, 300);
+    }catch(e){
+      return '请求失败：' + (e && e.message ? e.message : '未知错误') + '（多为跨域/网络被拦）';
+    }
+  }
+
+  async function openApiDiagnose(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>云端接口自检</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>当前接口域名</label>' +
+          '<input id="dgDomain" type="text" value="' + getApiDomain() + '" placeholder="https://api.yesapi.net/">' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">' +
+          '<button class="btn-line" id="dgTry1" style="height:34px">用 api.yesapi.net</button>' +
+          '<button class="btn-line" id="dgTry2" style="height:34px">用 api.yesapi.cn</button>' +
+        '</div>' +
+        '<div id="dgOut" style="font-size:12.5px;line-height:1.75;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:12px;white-space:pre-wrap;max-height:46vh;overflow:auto;font-family:ui-monospace,Menlo,monospace">点下面「开始自检」，会依次测试三个接口并显示果创云原样返回的报错。</div>' +
+        '<div style="font-size:12.5px;color:#94a3b8;margin-top:10px">把上面的输出整段截图发我，就能判断是表/字段/签名/域名哪个问题。</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">关闭</button><button class="btn-solid" id="dgRun">开始自检</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('dgTry1').onclick = function(){ $('dgDomain').value = 'https://api.yesapi.net/'; };
+    $('dgTry2').onclick = function(){ $('dgDomain').value = 'https://api.yesapi.cn/'; };
+
+    $('dgRun').onclick = async function(){
+      const dom = String($('dgDomain').value || '').trim().replace(/\/?$/, '/');
+      setApiDomain(dom);
+      const out = $('dgOut');
+      out.textContent = '接口域名：' + dom + '\n表名：' + CONFIG.TABLE + '\nAPP_KEY：' + CONFIG.APP_KEY.slice(0,8) + '…\n\n自检中…\n';
+      const lines = [];
+      const s1 = await probeApi(dom, 'App.Table.FreeQuery', { model_name: CONFIG.TABLE, page: 1, perpage: 50 });
+      lines.push('【1】查询表（App.Table.FreeQuery，不带条件）\n' + s1);
+      out.textContent += '\n' + lines[0] + '\n';
+      const s2 = await probeApi(dom, 'App.Table.FreeQuery', { model_name: CONFIG.TABLE, where: JSON.stringify([['user_id', '=', '自检账号']]), page: 1, perpage: 20 });
+      lines.push('【2】按 user_id 查询（真实场景用的就是这条）\n' + s2);
+      out.textContent += '\n' + lines[1] + '\n';
+      try{
+        const all = await probeApi(dom, 'App.Table.FreeQuery', { model_name: CONFIG.TABLE, page: 1, perpage: 20 });
+        out.textContent += '\n【2b】整表前 20 条（看 user_id 里到底存了哪些账号）\n' + all + '\n';
+      }catch(e){}
+      const s3 = await probeApi(dom, 'App.Table.Create', { model_name: CONFIG.TABLE, data: JSON.stringify({ user_id: '自检账号', stu_name: '自检', score: 0, shopdata: '{"students":[]}' }) });
+      lines.push('【3】写入一条测试数据（App.Table.Create）\n' + s3);
+      out.textContent += '\n' + lines[2] + '\n\n—— 自检结束 ——';
+      toast('自检完成，请把结果截图发我');
+    };
+  }
+
+  /* ================= 修改密码 / 修改账号 ================= */
+  function readPwdOf(user){
+    try{ return (JSON.parse(localStorage.getItem('class_user_' + user) || '{}') || {}).pwd || ''; }
+    catch(e){ return ''; }
+  }
+
+  function openChangePwdModal(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>修改密码</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>当前账号</label><div style="font-size:15px;font-weight:600;color:#0f172a">'+ currentUser +'</div></div>' +
+        '<div class="f"><label>原密码</label><input id="pwOld" type="password" placeholder="请输入现在的密码"></div>' +
+        '<div class="f"><label>新密码</label><input id="pwNew" type="password" placeholder="至少 2 位"></div>' +
+        '<div class="f"><label>确认新密码</label><input id="pwNew2" type="password" placeholder="再输入一次新密码"></div>' +
+        '<div style="font-size:12.5px;color:#94a3b8">提示：密码只保存在本机浏览器，换设备登录时输入新密码即可</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSavePwd">保存新密码</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    setTimeout(function(){ try{ $('pwOld').focus(); }catch(e){} }, 80);
+
+    $('mSavePwd').onclick = function(){
+      const cur = readPwdOf(currentUser);
+      const o = String($('pwOld').value || '').trim();
+      const n = String($('pwNew').value || '').trim();
+      const c = String($('pwNew2').value || '').trim();
+      if(!o){ toast('请输入原密码'); return; }
+      if(o !== cur){ toast('原密码不正确'); return; }
+      if(!n){ toast('新密码不能为空'); return; }
+      if(n.length < 2){ toast('新密码至少 2 位'); return; }
+      if(n !== c){ toast('两次输入的新密码不一致'); return; }
+      if(n === cur){ toast('新密码和原密码一样，没有变化'); return; }
+      localStorage.setItem('class_user_' + currentUser, JSON.stringify({ pwd: n }));
+      closeModal();
+      toast('✅ 密码已修改，下次登录请用新密码');
+    };
+  }
+
+  function openRenameModal(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>修改账号</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>当前账号</label><div style="font-size:15px;font-weight:600;color:#0f172a">'+ currentUser +'</div></div>' +
+        '<div class="f"><label>当前密码（验证身份）</label><input id="rnPwd" type="password" placeholder="输入现在的密码"></div>' +
+        '<div class="f"><label>新账号名</label><input id="rnNew" type="text" placeholder="例如：高二1班 / gao" value=""></div>' +
+        '<div style="font-size:12.5px;color:#94a3b8;line-height:1.7">改完之后：云端数据会以新账号名重新保存一份，积分、日清记录不会丢；旧账号的本机备份会保留。</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSaveName">确认修改</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+
+    $('mSaveName').onclick = function(){
+      const cur = readPwdOf(currentUser);
+      const pwd = String($('rnPwd').value || '').trim();
+      const nn = String($('rnNew').value || '').trim();
+      if(!pwd){ toast('请输入当前密码'); return; }
+      if(pwd !== cur){ toast('密码不正确'); return; }
+      if(!nn){ toast('请输入新账号名'); return; }
+      if(nn === currentUser){ toast('新账号名和现在一样'); return; }
+      if(!/^[\u4e00-\u9fa5A-Za-z0-9_\-]{2,20}$/.test(nn)){ toast('账号名 2-20 位，只能用中文/字母/数字/下划线'); return; }
+      if(localStorage.getItem('class_user_' + nn)){ toast('该账号已存在，换一个'); return; }
+
+      uiConfirm('确认修改账号',
+        '账号：' + currentUser + '  →  ' + nn + '\n\n' +
+        '改完后请用新账号名登录；云端会以「' + nn + '」保存一份完整数据。\n继续吗？',
+        function(){ doRenameAccount(nn, cur); }, '确认修改');
+    };
+  }
+
+  async function doRenameAccount(newName, pwd){
+    const oldName = currentUser;
+    setSync('正在迁移到新账号…', '#f59e0b');
+
+    /* 1) 云端按新账号名保存一份完整数据 */
+    let cloudDone = false;
+    try{
+      const payload = JSON.stringify({ students: students, shopGoods: shopGoods, redeemLogs: redeemLogs, homeworks: homeworks, notices: notices, dailyLogs: dailyLogs, attendLogs: attendLogs, updatedAt: Date.now() });
+      const dataObj = {
+        'user_id': newName,
+        'stu_name': '班级完整数据',
+        'score': students.reduce(function(n,s){ return n + (s.score || 0); }, 0),
+        'shopdata': payload
+      };
+      const j = await withTimeout(apiRequest('App.Table.Create', { model_name: CONFIG.TABLE, data: JSON.stringify(dataObj) }), 10000);
+      cloudDone = cloudOk(j);
+    }catch(e){ console.warn('新账号云端写入失败', e); }
+
+    /* 2) 本机账号与备份迁移（旧账号保留一份，不删） */
+    try{
+      localStorage.setItem('class_user_' + newName, JSON.stringify({ pwd: pwd }));
+      localStorage.setItem('class_backup_' + newName, JSON.stringify({ students: students, shopGoods: shopGoods, redeemLogs: redeemLogs, homeworks: homeworks, notices: notices, dailyLogs: dailyLogs, attendLogs: attendLogs, updatedAt: Date.now() }));
+    }catch(e){ console.warn('本机迁移失败', e); }
+
+    /* 3) 切换当前账号 */
+    currentUser = newName;
+    if(curUser) curUser.textContent = newName;
+
+    closeModal();
+    renderAll();
+    if(cloudDone){
+      setSync('✅ 云端已保存到新账号 ' + newName, '#10b981');
+      toast('✅ 账号已改为「' + newName + '」，云端数据已迁移');
+    }else{
+      setSync('⚠️ 账号已改为「' + newName + '」，云端未写入', '#f59e0b');
+      toast('账号已改为「' + newName + '」，但云端没写进去（旧账号 ' + oldName + ' 的云端数据仍在），稍后可点「☁️ 立即同步」重试');
+    }
+  }
+
+  /* ================= 个人中心 ================= */
+  $('btnProfile').onclick = function(){
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>个人中心</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>当前账号</label><b style="font-size:16px">'+ currentUser +'</b></div>' +
+        '<div style="font-size:13px;color:#64748b;margin-bottom:16px">学生 '+ students.length +' 人 · 记录 '+
+          students.reduce((n,s)=>n+((s.logs&&s.logs.length)||0),0) +' 条 · 奖品 '+ shopGoods.length +' 件</div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px">' +
+          '<button class="btn-line" id="pfPwd">🔐 修改密码</button>' +
+          '<button class="btn-line" id="pfRename">👤 修改账号</button>' +
+          '<button class="btn-line" id="pfSyncUp" style="color:#047857;background:#ecfdf5">☁️ 立即上传云端</button>' +
+          '<button class="btn-line" id="pfSyncDown" style="color:#1d4ed8;background:#eff6ff">⬇ 从云端拉取数据</button>' +
+          '<button class="btn-line" id="pfDiag" style="color:#92400e;background:#fffbeb">🔧 云端接口自检</button>' +
+          '<button class="btn-line" id="pfRecheck" style="color:#065f46;background:#ecfdf5">🔄 重新检测云端状态</button>' +
+          '<button class="btn-line" id="pfBackup">导出数据备份（JSON）</button>' +
+          '<button class="btn-line" id="pfRestore">导入数据备份（JSON）</button>' +
+          '<button class="btn-line" style="color:#e0454c;background:#fff6f6" id="pfClear">清空本账号数据</button>' +
+          '<button class="btn-line" id="pfLogout">退出登录</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCloseBtn">关闭</button></div>';
+    openModal();
+    $('mClose').onclick = $('mCloseBtn').onclick = closeModal;
+
+    $('pfPwd').onclick = function(){ openChangePwdModal(); };
+    $('pfRename').onclick = function(){ openRenameModal(); };
+
+    $('pfSyncUp').onclick = async function(){
+      const ok = await pushToCloud();
+      if(ok) toast('✅ 云端已有这份数据，换设备登录同名账号即可看到');
+    };
+    $('pfSyncDown').onclick = function(){ pullFromCloudNow(); };
+    $('pfDiag').onclick = function(){ openApiDiagnose(); };
+    $('pfRecheck').onclick = function(){
+      cloudOffline = false; cloudBusy = false;
+      toast('正在重新检测云端…');
+      precheckCloud().then(function(ok){
+        toast(ok ? '✅ 云端正常，可以同步了' : '⚠️ 云端仍不可用，稍后再试');
+      });
+    };
+
+    $('pfBackup').onclick = function(){
+      const backup = {
+        app: '班级全能管理系统',
+        version: 'v9',
+        account: currentUser,
+        exportTime: nowStr(),
+        students: students, shopGoods: shopGoods, redeemLogs: redeemLogs,
+        homeworks: homeworks, notices: notices, dailyLogs: dailyLogs, attendLogs: attendLogs
+      };
+      const data = JSON.stringify(backup, null, 2);
+      const blob = new Blob([data], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '班级数据备份_' + new Date().toLocaleDateString().replace(/[\/\\]/g,'-') + '.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+      toast('备份已导出（学生 ' + students.length + ' 人，积分记录 ' + students.reduce(function(n,s){ return n + ((s.logs && s.logs.length) || 0); }, 0) + ' 条，日清 ' + dailyLogs.length + ' 次）');
+    };
+
+    $('pfRestore').onclick = function(){
+      jsonInput.value = '';
+      jsonInput.click();
+    };
+
+    $('pfClear').onclick = function(){
+      uiConfirm('清空数据', '警告：将清空本账号所有学生、积分、作业、商城数据，且不可恢复，继续？', async function(){
+        students = []; shopGoods = []; redeemLogs = []; homeworks = []; notices = ''; dailyLogs = []; attendLogs = [];
+        renderAll();
+        await pushToCloud();
+        localStorage.setItem('class_backup_' + currentUser, JSON.stringify({ students, shopGoods, redeemLogs, homeworks, notices, dailyLogs, attendLogs, updatedAt: Date.now() }));
+        closeModal();
+        toast('已清空');
+      }, '清空');
+    };
+
+    $('pfLogout').onclick = function(){
+      currentUser = '';
+      $('loginPass').value = '';
+      $('loginUser').value = '';
+      appView.classList.add('hidden');
+      loginView.classList.remove('hidden');
+      closeModal();
+    };
+  };
+
+  /* ================= 导出报表 ================= */
+  if($('btnSyncNow')){
+    $('btnSyncNow').onclick = async function(){
+      if(!currentUser){ toast('请先登录'); return; }
+      this.disabled = true;
+      /* 手动点同步 = 用户主动重试：先清掉繁忙/离线锁，再试一次 */
+      if(cloudOffline || cloudBusy){
+        cloudOffline = false; cloudBusy = false;
+        setSync('正在重试云端…', '#f59e0b');
+      }
+      const ok = await pushToCloud();
+      this.disabled = false;
+      if(ok) toast('✅ 已上传：学生 ' + students.length + ' 人 · 积分记录 ' + students.reduce(function(n,s){ return n + ((s.logs && s.logs.length) || 0); }, 0) + ' 条 · 日清 ' + dailyLogs.length + ' 次');
+    };
+  }
+
+  $('btnExport').onclick = function(){
+    if(students.length === 0){ toast('没有数据可导出'); return; }
+    toast('正在生成 Excel 报表…');
+    const sheets = buildReportSheets();
+    downloadXlsx(sheets, reportFileName('班级全能管理系统报表'));
+    toast('已导出 Excel（' + sheets.length + ' 个工作表）');
+  };
+
+  $('btnAddDaily').onclick = function(){ openDailyModal(null); };
+
+  $('btnExpDaily').onclick = function(){
+    if(dailyLogs.length === 0){ toast('还没有日清记录'); return; }
+    const dailyRows = [[ H('日期'), H('科目'), H('考试名称'), H('姓名'), H('小组'), H('分数'), H('该次班级均分') ]];
+    dailySorted().slice().reverse().forEach(function(d){
+      const scores = d.scores || {};
+      const arr = Object.keys(scores).map(function(k){ return Number(scores[k]); }).filter(function(v){ return !isNaN(v); });
+      const avg = arr.length ? Math.round(arr.reduce(function(a,b){ return a+b; },0) / arr.length * 10) / 10 : '';
+      students.forEach(function(s){
+        if(scores[s.id] === undefined || scores[s.id] === null || String(scores[s.id]) === '') return;
+        dailyRows.push([ String(d.date || ''), d.subject || '', d.examName || '', s.name, s.group || '未分组', Number(scores[s.id]), avg ]);
+      });
+    });
+    const avgRows = [[ H('姓名'), H('小组'), H('语文'), H('数学'), H('英语'), H('物理'), H('化学'), H('生物') ]];
+    students.forEach(function(s){
+      const cells = SUBJECTS.map(function(sub){
+        let sum = 0, cnt = 0;
+        dailyLogs.forEach(function(d){
+          if(d.subject !== sub) return;
+          const v = (d.scores || {})[s.id];
+          if(v !== undefined && v !== null && String(v) !== ''){ sum += Number(v) || 0; cnt++; }
+        });
+        return cnt ? Math.round(sum / cnt * 10) / 10 : '';
+      });
+      avgRows.push([ s.name, s.group || '未分组' ].concat(cells));
+    });
+    downloadXlsx([
+      { name:'日清记录', cols:[14, 10, 28, 14, 14, 10, 14], rows: dailyRows },
+      { name:'六科平均分', cols:[14, 14, 10, 10, 10, 10, 10, 10], rows: avgRows }
+    ], reportFileName('日清记录'));
+    toast('日清记录已导出');
+  };
+
+  /* 成绩单导出（Excel，多工作表） */
+  if($('btnExportExam')){
+    $('btnExportExam').onclick = function(){
+      if(students.length === 0){ toast('没有学生数据'); return; }
+      const groupMap = colNamesGroups();
+      const groupNames = Object.keys(groupMap).sort(groupSortKey);
+      const sheets = [];
+      groupNames.forEach(function(g){
+        const list = [...groupMap[g]].sort(function(a,b){ return examTotal(b.exam) - examTotal(a.exam); });
+        const rows = [[ H('排名'), H('姓名'), H('职务'), H('学年榜'), H('语文'), H('数学'), H('英语'), H('物理'), H('化学'), H('生物'), H('总分') ]];
+        list.forEach(function(s, i){
+          const e = s.exam || {};
+          rows.push([ i+1, s.name, s.duty || '-',
+            (s.year === null || s.year === undefined || s.year === '') ? '' : s.year,
+            e.ch||0, e.ma||0, e.en||0, e.ph||0, e.chm||0, e.bio||0, examTotal(e) ]);
+        });
+        const sum = list.reduce(function(n,s){ return n + examTotal(s.exam||{}); }, 0);
+        rows.push([]);
+        rows.push([ H('小组人数'), H('小组总分'), H('小组均分') ]);
+        rows.push([ list.length, sum, list.length ? Math.round(sum / list.length * 10) / 10 : 0 ]);
+        sheets.push({ name: g + '成绩', cols:[8, 14, 14, 12, 10, 10, 10, 10, 10, 10, 10], rows: rows });
+      });
+      sheets.push({
+        name:'全班成绩总表',
+        cols:[8, 16, 16, 12, 10, 10, 10, 10, 10, 10, 10],
+        rows: [[ H('排名'), H('姓名'), H('小组'), H('职务'), H('学年榜'), H('语文'), H('数学'), H('英语'), H('物理'), H('化学'), H('生物'), H('总分') ]].concat(
+          [...students].sort(function(a,b){ return examTotal(b.exam) - examTotal(a.exam); }).map(function(s, i){
+            const e = s.exam || {};
+            return [ i+1, s.name, s.group || '未分组', s.duty || '-',
+              (s.year === null || s.year === undefined || s.year === '') ? '' : s.year,
+              e.ch||0, e.ma||0, e.en||0, e.ph||0, e.chm||0, e.bio||0, examTotal(e) ];
+          })
+        )
+      });
+      downloadXlsx(sheets, reportFileName('成绩单'));
+      toast('成绩单已导出');
+    };
+  }
+
+  /* ================= 考试倒计时 ================= */
+  /* 日期文本解析：支持 2027-06-07 / 2027/6/7 / 2027年6月7日 / 20270607 */
+  function parseDateInput(str){
+    str = String(str || '').trim();
+    if(!str) return null;
+    let m = str.match(/(\d{4})[\/\-\.年\s]+(\d{1,2})[\/\-\.月\s]+(\d{1,2})/);
+    if(!m) m = str.match(/(\d{4})(\d{2})(\d{2})/);
+    if(m){
+      const d = new Date(+m[1], +m[2]-1, +m[3]);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? null : d.getTime();
+  }
+
+  function fmtDateInput(ts){
+    const d = new Date(ts);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function getExamDate(){
+    const v = localStorage.getItem('class_exam_date');
+    if(v){
+      const t = new Date(v + 'T00:00:00').getTime();
+      if(!isNaN(t)) return t;
+    }
+    const d = new Date();
+    d.setDate(d.getDate() + 60);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  }
+
+  function fmtDate(ts){
+    const d = new Date(ts);
+    return d.getFullYear() + ' 年 ' + (d.getMonth()+1) + ' 月 ' + d.getDate() + ' 日';
+  }
+
+  function updateCountdown(){
+    const el = $('examCountdown');
+    if(!el) return;
+    const dist = getExamDate() - Date.now();
+    el.textContent = (dist <= 0 ? '0' : Math.ceil(dist / 86400000)) + ' 天';
+    const dt = $('examDateText');
+    if(dt){
+      const has = localStorage.getItem('class_exam_date');
+      dt.textContent = '目标日期：' + (has ? fmtDate(getExamDate()) : fmtDate(getExamDate()) + '（默认）');
+    }
+  }
+
+  function initCountdown(){
+    updateCountdown();
+    if(countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(updateCountdown, 60000);
+  }
+
+  /* 通过「设置目标日期」按钮弹窗设置，天数本身不直接改 */
+  $('btnSetExamDate').onclick = function(){
+    const cur = localStorage.getItem('class_exam_date') || '';
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>设置目标日期</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div class="f"><label>考试名称</label><input id="sdName" value="'+ (($('examName').textContent || '期末考试').trim()) +'"></div>' +
+        '<div class="f"><label>目标日期</label><input id="sdDate" type="text" value="'+ cur +'" placeholder="直接输入，如 2027-06-07 或 2027/6/7"></div>' +
+        '<div style="font-size:12.5px;color:#94a3b8">可以直接打字输入日期，也可以用下面的快捷按钮</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">' +
+          '<button type="button" class="btn-line" data-quick="30">30 天后</button>' +
+          '<button type="button" class="btn-line" data-quick="60">60 天后</button>' +
+          '<button type="button" class="btn-line" data-quick="100">100 天后</button>' +
+          '<button type="button" class="btn-line" data-quick="final">本学期末（次年1月15日）</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mClearDate">清除日期</button><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">保存</button></div>';
+    openModal();
+
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+
+    box.querySelectorAll('[data-quick]').forEach(btn=>{
+      btn.onclick = function(){
+        const q = this.dataset.quick;
+        if(q === 'final'){
+          const now = new Date();
+          $('sdDate').value = (now.getMonth() >= 7 ? now.getFullYear() + 1 : now.getFullYear()) + '-01-15';
+        }else{
+          const d = new Date();
+          d.setDate(d.getDate() + Number(q));
+          $('sdDate').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+      };
+    });
+
+    $('mClearDate').onclick = function(){
+      localStorage.removeItem('class_exam_date');
+      closeModal();
+      updateCountdown();
+      toast('已清除目标日期');
+    };
+
+    $('mSave').onclick = function(){
+      const name = ($('sdName').value || '').trim() || '期末考试';
+      const dv = ($('sdDate').value || '').trim();
+      $('examName').textContent = name;
+      localStorage.setItem('class_exam_name', name);
+      if(dv){
+        const t = parseDateInput(dv);
+        if(!t){ toast('日期看不懂，试试 2027-06-07 这种格式'); return; }
+        localStorage.setItem('class_exam_date', fmtDateInput(t));
+      }
+      closeModal();
+      updateCountdown();
+      toast('目标日期已保存');
+    };
+  };
+
+  $('examName').addEventListener('blur', function(){
+    localStorage.setItem('class_exam_name', (this.textContent || '').trim() || '期末考试');
+  });
+
+  (function loadExamName(){
+    const v = localStorage.getItem('class_exam_name');
+    if(v && $('examName')) $('examName').textContent = v;
+    updateCountdown();
+  })();
+
+  /* ================= 日清记录（六科随堂小考） ================= */
+  const SUBJECTS = ['语文','数学','英语','物理','化学','生物'];
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function dailySorted(){
+    return [...dailyLogs].sort((a,b)=> String(b.date||'').localeCompare(String(a.date||'')));
+  }
+
+  function renderDaily(){
+    const tbody = $('tbodyDaily'); if(!tbody) return;
+    const list = dailySorted();
+    if(list.length === 0){
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty">还没有日清记录，点右上角「+ 新增日清记录」</div></td></tr>';
+    }else{
+      tbody.innerHTML = list.map(d=>{
+        const arr = Object.keys(d.scores || {}).map(k=>Number(d.scores[k])).filter(v=>!isNaN(v));
+        const sum = arr.reduce((a,b)=>a+b,0);
+        const avg = arr.length ? (sum/arr.length).toFixed(1) : '-';
+        const max = arr.length ? Math.max.apply(null, arr) : '-';
+        const min = arr.length ? Math.min.apply(null, arr) : '-';
+        return '<tr>' +
+          '<td>'+ (d.date || '-') +'</td>' +
+          '<td><span style="display:inline-block;padding:2px 9px;border-radius:7px;background:#eff6ff;color:#2563eb;font-weight:600;font-size:12.5px">'+ (d.subject || '-') +'</span></td>' +
+          '<td>'+ (d.examName || '-') +'</td>' +
+          '<td>'+ arr.length +'</td>' +
+          '<td><b style="color:#2563eb">'+ avg +'</b></td>' +
+          '<td style="color:#10b981;font-weight:600">'+ max +'</td>' +
+          '<td style="color:#ef4444;font-weight:600">'+ min +'</td>' +
+          '<td><div class="acts">' +
+            '<button class="act plain" data-dedit="'+ d.id +'">编辑</button>' +
+            '<button class="act plain" data-ddel="'+ d.id +'">删除</button>' +
+          '</div></td></tr>';
+      }).join('');
+
+      tbody.querySelectorAll('[data-dedit]').forEach(b=>{
+        b.onclick = ()=> openDailyModal(b.dataset.dedit);
+      });
+      tbody.querySelectorAll('[data-ddel]').forEach(b=>{
+        b.onclick = ()=> uiConfirm('删除日清记录', '确定删除这条日清记录？', function(){
+          dailyLogs = dailyLogs.filter(x=>String(x.id) !== String(b.dataset.ddel));
+          renderAll();
+          scheduleSave();
+          toast('已删除');
+        }, '删除');
+      });
+    }
+
+    /* 每人六科日清平均分 */
+    const tbodyAvg = $('tbodyDailyAvg'); if(!tbodyAvg) return;
+    if(students.length === 0){
+      tbodyAvg.innerHTML = '<tr><td colspan="8"><div class="empty">暂无学生</div></td></tr>';
+      return;
+    }
+    tbodyAvg.innerHTML = students.map(s=>{
+      const cells = SUBJECTS.map(sub=>{
+        let sum = 0, cnt = 0;
+        dailyLogs.forEach(d=>{
+          if(d.subject !== sub) return;
+          const v = (d.scores || {})[s.id];
+          if(v !== undefined && v !== null && String(v) !== ''){ sum += Number(v) || 0; cnt++; }
+        });
+        return '<td>'+ (cnt ? (sum/cnt).toFixed(1) : '-') +'</td>';
+      }).join('');
+      return '<tr><td><div class="name-cell"><div class="avatar" style="background:'+ groupColor(s.group) +'">'+ ((s.name||'?').charAt(0)) +'</div><span>'+ s.name +'</span></div></td><td>'+ (s.group || '未分组') +'</td>'+ cells +'</tr>';
+    }).join('');
+  }
+
+  function openDailyModal(id){
+    const isEdit = id !== undefined && id !== null && String(id) !== '';
+    const rec = isEdit ? dailyLogs.filter(x=>String(x.id) === String(id))[0] : null;
+    const data = rec || { id: Date.now(), date: todayStr(), subject: '语文', examName: '', scores: {} };
+
+    const box = $('modalBox');
+    box.innerHTML =
+      '<div class="m-hd"><h3>'+(isEdit ? '编辑日清记录' : '新增日清记录')+'</h3><button class="m-close" id="mClose">×</button></div>' +
+      '<div class="m-bd">' +
+        '<div style="display:flex;gap:10px">' +
+          '<div class="f" style="flex:1"><label>日期</label><input id="dlDate" type="text" value="'+ (data.date || todayStr()) +'" placeholder="2026-11-17"></div>' +
+          '<div class="f" style="flex:1"><label>科目</label>'+ pickFieldHtml('dlSubject', data.subject || '语文', data.subject || '语文') +'</div>' +
+        '</div>' +
+        '<div class="f"><label>考试名称</label><input id="dlName" value="'+ String(data.examName || '').replace(/"/g,'&quot;') +'" placeholder="如：第3次周测 / 文言文小测"></div>' +
+        '<div style="font-size:13px;color:#64748b;margin:14px 0 8px">录入分数（留空表示缺考/未录入）</div>' +
+        '<div style="max-height:36vh;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px;padding:10px">' +
+          (students.length === 0
+            ? '<div class="empty">请先添加学生</div>'
+            : students.map(s=>{
+                const v = (data.scores || {})[s.id];
+                return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0">' +
+                  '<div class="avatar" style="background:'+ groupColor(s.group) +'">'+ ((s.name||'?').charAt(0)) +'</div>' +
+                  '<div style="flex:1;font-size:14px">'+ s.name +'<span style="font-size:12px;color:#94a3b8;margin-left:6px">'+ (s.group||'未分组') +'</span></div>' +
+                  '<input class="dl-score" data-sid="'+ s.id +'" type="number" value="'+ (v === undefined || v === null ? '' : v) +'" placeholder="分数" style="width:90px;height:36px;text-align:center">' +
+                '</div>';
+              }).join('')) +
+        '</div>' +
+      '</div>' +
+      '<div class="m-ft"><button class="btn-line" id="mCancel">取消</button><button class="btn-solid" id="mSave">保存</button></div>';
+    openModal();
+    setupPickField('dlSubjectBtn', 'dlSubject', '选择科目', function(){
+      return SUBJECTS.map(v=>({ value:v, label:v }));
+    });
+
+    $('mClose').onclick = $('mCancel').onclick = closeModal;
+    $('mSave').onclick = function(){
+      const dateStr = String($('dlDate').value || '').trim();
+      const dt = parseDateInput(dateStr);
+      if(!dt){ toast('日期看不懂，用 2026-11-17 这种格式'); return; }
+      const subject = $('dlSubject').value || '语文';
+      const examName = ($('dlName').value || '').trim();
+      if(!examName){ toast('请填写考试名称'); return; }
+
+      const scores = {};
+      box.querySelectorAll('.dl-score').forEach(inp=>{
+        const raw = String(inp.value || '').trim();
+        if(raw === '') return;
+        const n = Number(raw);
+        if(isNaN(n)) return;
+        scores[inp.dataset.sid] = n;
+      });
+
+      const payload = { id: data.id, date: fmtDateInput(dt), subject: subject, examName: examName, scores: scores };
+      if(isEdit){
+        const idx = dailyLogs.findIndex(x=>String(x.id) === String(data.id));
+        if(idx >= 0) dailyLogs[idx] = payload; else dailyLogs.push(payload);
+      }else{
+        dailyLogs.push(payload);
+      }
+      closeModal();
+      renderAll();
+      scheduleSave();
+      toast('日清记录已保存');
+    };
+  }
+
+  /* ================= 周总结 / 月总结 ================= */
+  function parseLogTime(str){
+    if(!str) return null;
+    const m = String(str).match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+    if(m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +(m[6]||0)).getTime();
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? null : d.getTime();
+  }
+
+  function weekStart(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    const wd = d.getDay(); // 0=周日
+    const back = (wd === 0 ? 6 : wd - 1);
+    d.setDate(d.getDate() - back);
+    return d.getTime();
+  }
+
+  function monthStart(){
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+  }
+
+  function fmtDay(ts){
+    const d = new Date(ts);
+    return (d.getMonth()+1) + '月' + d.getDate() + '日';
+  }
+
+  function buildSummary(startTs){
+    const rows = [];
+    const groupMap = {};
+    const reasonMap = {};
+    let totalPlus = 0, totalMinus = 0, logCount = 0, active = 0;
+
+    students.forEach(s=>{
+      let plus = 0, minus = 0, cnt = 0;
+      (s.logs || []).forEach(l=>{
+        const t = parseLogTime(l.time);
+        if(t === null || t < startTs) return;
+        const d = Number(l.delta) || 0;
+        if(d > 0){ plus += d; totalPlus += d; }
+        else if(d < 0){ minus += Math.abs(d); totalMinus += Math.abs(d); }
+        cnt++; logCount++;
+        const r = (l.reason || '未注明').trim();
+        reasonMap[r] = (reasonMap[r] || 0) + 1;
+
+        const g = s.group || '未分组';
+        if(!groupMap[g]) groupMap[g] = { plus:0, minus:0, cnt:0 };
+        if(d > 0) groupMap[g].plus += d; else if(d < 0) groupMap[g].minus += Math.abs(d);
+        groupMap[g].cnt++;
+      });
+      if(cnt > 0) active++;
+      rows.push({ name:s.name, group:(s.group || '未分组'), plus:plus, minus:minus, net:plus-minus, cnt:cnt, score:(s.score||0) });
+    });
+
+    rows.sort((a,b)=>b.net - a.net);
+    const groups = Object.keys(groupMap).map(g=>({
+      group:g, plus:groupMap[g].plus, minus:groupMap[g].minus,
+      net:groupMap[g].plus - groupMap[g].minus, cnt:groupMap[g].cnt
+    })).sort((a,b)=>b.net - a.net);
+    const topReasons = Object.keys(reasonMap).map(r=>({ reason:r, cnt:reasonMap[r] })).sort((a,b)=>b.cnt - a.cnt).slice(0, 5);
+
+    return { startTs, rows, groups, topReasons, totalPlus, totalMinus, net: totalPlus - totalMinus, logCount, active };
+  }
+
+  let weekSummaryData = null, monthSummaryData = null;
+
+  function summaryBlockHtml(title, sub, data, accent){
+    const kpi = (label, val, color) =>
+      '<div style="flex:1;min-width:110px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px">' +
+        '<div style="font-size:12px;color:#94a3b8">'+ label +'</div>' +
+        '<div style="font-size:20px;font-weight:800;color:'+ color +';margin-top:2px">'+ val +'</div>' +
+      '</div>';
+
+    const tableRows = data.rows.filter(r=>r.cnt > 0).map((r,i)=>
+      '<tr>' +
+        '<td>'+(i+1)+'</td>' +
+        '<td><div class="name-cell"><div class="avatar" style="background:'+ groupColor(r.group) +'">'+ (r.name||'?').charAt(0) +'</div><span>'+ r.name +'</span></div></td>' +
+        '<td>'+ r.group +'</td>' +
+        '<td style="color:#10b981;font-weight:600">+'+ r.plus +'</td>' +
+        '<td style="color:#ef4444;font-weight:600">-'+ r.minus +'</td>' +
+        '<td style="font-weight:700;color:'+ (r.net>0?'#10b981':(r.net<0?'#ef4444':'#94a3b8')) +'">'+ (r.net>0?'+':'') + r.net +'</td>' +
+        '<td>'+ r.cnt +'</td>' +
+      '</tr>');
+
+    const groupRows = data.groups.map(g=>
+      '<tr><td>'+ g.group +'</td><td style="color:#10b981;font-weight:600">+'+ g.plus +'</td>' +
+      '<td style="color:#ef4444;font-weight:600">-'+ g.minus +'</td>' +
+      '<td style="font-weight:700;color:'+ (g.net>0?'#10b981':(g.net<0?'#ef4444':'#94a3b8')) +'">'+ (g.net>0?'+':'') + g.net +'</td>' +
+      '<td>'+ g.cnt +'</td></tr>');
+
+    return '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:20px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:14px">' +
+        '<div><div style="font-size:17px;font-weight:800;color:#1e293b">'+ title +'</div>' +
+        '<div style="font-size:12.5px;color:#94a3b8;margin-top:3px">'+ sub +'</div></div>' +
+        '<div style="font-size:13px;color:'+ accent +';font-weight:700">共 '+ data.logCount +' 条记录</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">' +
+        kpi('总加分', '+'+ data.totalPlus, '#10b981') +
+        kpi('总扣分', '-'+ data.totalMinus, '#ef4444') +
+        kpi('净变化', (data.net>0?'+':'')+data.net, data.net>=0 ? '#2563eb' : '#ef4444') +
+        kpi('参与人数', data.active + ' / ' + students.length, '#7c3aed') +
+      '</div>' +
+      '<div class="tbl-scroll" style="background:#fff;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:16px">' +
+        '<table><thead><tr><th>排名</th><th>姓名</th><th>小组</th><th>加分</th><th>扣分</th><th>净变化</th><th>记录数</th></tr></thead>' +
+        '<tbody>' + (tableRows.length ? tableRows.join('') : '<tr><td colspan="7"><div class="empty">本区间还没有记录</div></td></tr>') + '</tbody></table>' +
+      '</div>' +
+      '<div style="display:flex;gap:16px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:280px">' +
+          '<div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:8px">小组表现</div>' +
+          '<div class="tbl-scroll" style="background:#fff;border-radius:10px;border:1px solid #e2e8f0">' +
+            '<table><thead><tr><th>小组</th><th>加分</th><th>扣分</th><th>净变化</th><th>记录数</th></tr></thead>' +
+            '<tbody>' + (groupRows.length ? groupRows.join('') : '<tr><td colspan="5"><div class="empty">暂无数据</div></td></tr>') + '</tbody></table>' +
+          '</div>' +
+        '</div>' +
+        '<div style="flex:1;min-width:260px">' +
+          '<div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:8px">高频条目 TOP5</div>' +
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px">' +
+            (data.topReasons.length
+              ? data.topReasons.map((r,i)=>'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13.5px"><span>'+(i+1)+'. '+ r.reason +'</span><b style="color:#2563eb">'+ r.cnt +'</b></div>').join('')
+              : '<div class="empty">暂无数据</div>') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderSummary(){
+    const box = $('summaryBody'); if(!box) return;
+    weekSummaryData = buildSummary(weekStart());
+    monthSummaryData = buildSummary(monthStart());
+
+    box.innerHTML =
+      summaryBlockHtml('📅 本周总结', fmtDay(weekStart()) + ' ~ ' + fmtDay(Date.now()), weekSummaryData, '#2563eb') +
+      summaryBlockHtml('🗓 本月总结', fmtDay(monthStart()) + ' ~ ' + fmtDay(Date.now()), monthSummaryData, '#7c3aed');
+  }
+
+  function summaryCsv(data, title){
+    let csv = '==================================================\n';
+    csv += '        ' + title + '\n';
+    csv += '        统计区间：' + fmtDay(data.startTs) + ' ~ ' + fmtDay(Date.now()) + '\n';
+    csv += '==================================================\n\n';
+    csv += '总加分,' + data.totalPlus + '\n总扣分,' + data.totalMinus + '\n净变化,' + data.net + '\n记录数,' + data.logCount + '\n\n';
+
+    csv += '【学生明细】\n排名,姓名,小组,加分,扣分,净变化,记录数\n';
+    data.rows.filter(r=>r.cnt > 0).forEach((r,i)=>{
+      csv += [i+1, r.name, r.group, r.plus, r.minus, r.net, r.cnt].join(',') + '\n';
+    });
+    csv += '\n【小组表现】\n小组,加分,扣分,净变化,记录数\n';
+    data.groups.forEach(g=>{ csv += [g.group, g.plus, g.minus, g.net, g.cnt].join(',') + '\n'; });
+
+    csv += '\n【高频条目】\n条目,次数\n';
+    data.topReasons.forEach(r=>{ csv += [r.reason, r.cnt].join(',') + '\n'; });
+    return csv;
+  }
+
+  $('btnExpWeek').onclick = function(){
+    renderSummary();
+    downloadCsv(summaryCsv(weekSummaryData, '班级本周总结'), '班级本周总结.csv');
+    toast('本周总结已导出');
+  };
+  $('btnExpMonth').onclick = function(){
+    renderSummary();
+    downloadCsv(summaryCsv(monthSummaryData, '班级本月总结'), '班级本月总结.csv');
+    toast('本月总结已导出');
+  };
+
+  /* ================= 零依赖 xlsx 生成器（多工作表） ================= */
+  function xlsxCrcTable(){
+    const t = new Uint32Array(256);
+    for(let n=0;n<256;n++){
+      let c = n;
+      for(let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  }
+  const XLSX_CRC_T = xlsxCrcTable();
+  function xlsxCrc(u8){
+    let c = 0xFFFFFFFF;
+    for(let i=0;i<u8.length;i++) c = XLSX_CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function xlsxZip(files){
+    const enc = new TextEncoder();
+    const d = new Date();
+    const dosTime = ((d.getHours() & 0x1F) << 11) | ((d.getMinutes() & 0x3F) << 5) | (Math.floor(d.getSeconds()/2) & 0x1F);
+    const dosDate = (((d.getFullYear() - 1980) & 0x7F) << 9) | (((d.getMonth()+1) & 0xF) << 5) | (d.getDate() & 0x1F);
+    const locals = [], centrals = [];
+    let offset = 0;
+    files.forEach(function(f){
+      const nameU8 = enc.encode(f.name);
+      const dataU8 = (f.data instanceof Uint8Array) ? f.data : enc.encode(f.data);
+      const crc = xlsxCrc(dataU8);
+      const lh = new Uint8Array(30 + nameU8.length + dataU8.length);
+      const dv = new DataView(lh.buffer);
+      dv.setUint32(0, 0x04034b50, true);
+      dv.setUint16(4, 20, true);
+      dv.setUint16(6, 0x0800, true);
+      dv.setUint16(8, 0, true);
+      dv.setUint16(10, dosTime, true);
+      dv.setUint16(12, dosDate, true);
+      dv.setUint32(14, crc, true);
+      dv.setUint32(18, dataU8.length, true);
+      dv.setUint32(22, dataU8.length, true);
+      dv.setUint16(26, nameU8.length, true);
+      dv.setUint16(28, 0, true);
+      lh.set(nameU8, 30);
+      lh.set(dataU8, 30 + nameU8.length);
+      locals.push(lh);
+
+      const cd = new Uint8Array(46 + nameU8.length);
+      const dv2 = new DataView(cd.buffer);
+      dv2.setUint32(0, 0x02014b50, true);
+      dv2.setUint16(4, 20, true);
+      dv2.setUint16(6, 20, true);
+      dv2.setUint16(8, 0x0800, true);
+      dv2.setUint16(10, 0, true);
+      dv2.setUint16(12, dosTime, true);
+      dv2.setUint16(14, dosDate, true);
+      dv2.setUint32(16, crc, true);
+      dv2.setUint32(20, dataU8.length, true);
+      dv2.setUint32(24, dataU8.length, true);
+      dv2.setUint16(28, nameU8.length, true);
+      dv2.setUint32(42, offset, true);
+      cd.set(nameU8, 46);
+      centrals.push(cd);
+      offset += lh.length;
+    });
+
+    const totalLen = locals.reduce(function(n,a){ return n + a.length; }, 0) + centrals.reduce(function(n,a){ return n + a.length; }, 0) + 22;
+    const out = new Uint8Array(totalLen);
+    let pos = 0;
+    locals.forEach(function(a){ out.set(a, pos); pos += a.length; });
+    const cdOffset = pos;
+    centrals.forEach(function(a){ out.set(a, pos); pos += a.length; });
+    const eocd = new Uint8Array(22);
+    const dv3 = new DataView(eocd.buffer);
+    dv3.setUint32(0, 0x06054b50, true);
+    dv3.setUint16(8, files.length, true);
+    dv3.setUint16(10, files.length, true);
+    dv3.setUint32(12, pos - cdOffset, true);
+    dv3.setUint32(16, cdOffset, true);
+    out.set(eocd, pos);
+    return out;
+  }
+  function xlsxEsc(v){
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+  }
+  function xlsxCol(n){
+    let s = '';
+    n = n + 1;
+    while(n > 0){ const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - m) / 26); }
+    return s;
+  }
+  function xlsxSheetXml(rows, widths){
+    let cols = '';
+    if(widths && widths.length){
+      cols = '<cols>' + widths.map(function(w,i){ return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+ w +'" customWidth="1"/>'; }).join('') + '</cols>';
+    }
+    const body = rows.map(function(row, r){
+      const cells = row.map(function(cell, c){
+        if(cell === null || cell === undefined || cell === '') return '';
+        const val = (cell && typeof cell === 'object') ? cell.v : cell;
+        const style = (cell && typeof cell === 'object' && cell.s !== undefined) ? ' s="'+cell.s+'"' : '';
+        const ref = xlsxCol(c) + (r+1);
+        if(typeof val === 'number' && isFinite(val)) return '<c r="'+ref+'"'+style+'><v>'+val+'</v></c>';
+        return '<c r="'+ref+'"'+style+' t="inlineStr"><is><t xml:space="preserve">'+ xlsxEsc(val) +'</t></is></c>';
+      }).join('');
+      return '<row r="'+(r+1)+'">'+cells+'</row>';
+    }).join('');
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' + cols + '<sheetData>' + body + '</sheetData></worksheet>';
+  }
+  function buildXlsx(sheets){
+    const used = {};
+    const safe = sheets.map(function(s,i){
+      let nm = String(s.name || ('Sheet'+(i+1))).replace(/[\\\/\[\]:*?]/g,'_').replace(/[\u0000-\u001F]/g,'').slice(0,31) || ('Sheet'+(i+1));
+      let base = nm, k = 2;
+      while(used[nm]){
+        const suf = '(' + k + ')';
+        nm = base.slice(0, 31 - suf.length) + suf;
+        k++;
+      }
+      used[nm] = true;
+      return { name: nm, xml: xlsxSheetXml(s.rows || [], s.cols) };
+    });
+    const files = [];
+    files.push({ name:'[Content_Types].xml', data:
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      safe.map(function(s,i){ return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' });
+    files.push({ name:'_rels/.rels', data:
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' });
+    files.push({ name:'xl/workbook.xml', data:
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+      safe.map(function(s,i){ return '<sheet name="'+ xlsxEsc(s.name) +'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>'; }).join('') + '</sheets></workbook>' });
+    files.push({ name:'xl/_rels/workbook.xml.rels', data:
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      safe.map(function(s,i){ return '<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>'; }).join('') +
+      '<Relationship Id="rId'+(safe.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' });
+    files.push({ name:'xl/styles.xml', data:
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="宋体"/></font><font><b/><sz val="11"/><name val="宋体"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs></styleSheet>' });
+    safe.forEach(function(s,i){ files.push({ name:'xl/worksheets/sheet'+(i+1)+'.xml', data:s.xml }); });
+    return xlsxZip(files);
+  }
+  function downloadXlsx(sheets, filename){
+    const bytes = buildXlsx(sheets);
+    const blob = new Blob([bytes], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 3000);
+  }
+  function H(v){ return { v: v, s: 1 }; }
+  function colNamesGroups(){
+    const map = {};
+    students.forEach(function(s){
+      const g = s.group || '未分组';
+      if(!map[g]) map[g] = [];
+      map[g].push(s);
+    });
+    return map;
+  }
+  function groupSortKey(a, b){
+    const na = (a.match(/\d+/) || [])[0], nb = (b.match(/\d+/) || [])[0];
+    if(na && nb) return Number(na) - Number(nb);
+    if(na) return -1;
+    if(nb) return 1;
+    return a.localeCompare(b);
+  }
+  function buildReportSheets(){
+    const sheets = [];
+    const groupMap = colNamesGroups();
+    const groupNames = Object.keys(groupMap).sort(groupSortKey);
+
+    /* 每个小组一个工作表（第1组 = Sheet1 …） */
+    groupNames.forEach(function(g){
+      const list = [...groupMap[g]].sort(function(a,b){ return (b.score||0) - (a.score||0); });
+      const rows = [[ H('排名'), H('姓名'), H('职务'), H('小组'), H('当前积分'), H('时间'), H('变动分值'), H('原因/备注') ]];
+      list.forEach(function(s, i){
+        const logs = [...(s.logs || [])].reverse();
+        if(logs.length === 0){
+          rows.push([ i+1, s.name, s.duty || '-', g, s.score || 0, '（暂无加减分记录）', '', '' ]);
+          return;
+        }
+        logs.forEach(function(l){
+          rows.push([ i+1, s.name, s.duty || '-', g, s.score || 0, String(l.time || ''), (Number(l.delta) > 0 ? '+' + l.delta : l.delta), l.reason || '' ]);
+        });
+      });
+      rows.push([]);
+      rows.push([ H('小组人数'), H('小组总积分'), H('小组成员人均') ]);
+      const sum = list.reduce(function(n,s){ return n + (s.score||0); }, 0);
+      rows.push([ list.length, sum, list.length ? Math.round(sum / list.length * 10) / 10 : 0 ]);
+      sheets.push({ name: g, cols: [8, 14, 14, 14, 12, 22, 11, 34], rows: rows });
+    });
+
+    /* 总积分榜 */
+    const sortedStu = [...students].sort(function(a,b){ return (b.score||0) - (a.score||0); });
+    const totalRows = [[ H('排名'), H('姓名'), H('小组'), H('职务'), H('当前积分'), H('加减分记录数') ]];
+    sortedStu.forEach(function(s, i){
+      totalRows.push([ i+1, s.name, s.group || '未分组', s.duty || '-', s.score || 0, (s.logs || []).length ]);
+    });
+    totalRows.push([]);
+    totalRows.push([ H('班级总积分'), students.reduce(function(n,s){ return n + (s.score||0); }, 0) ]);
+    sheets.push({ name:'总积分榜', cols:[8, 16, 16, 16, 12, 14], rows: totalRows });
+
+    /* 六科成绩 */
+    const examRows = [[ H('排名'), H('姓名'), H('小组'), H('学年榜'), H('语文'), H('数学'), H('英语'), H('物理'), H('化学'), H('生物'), H('总分') ]];
+    [...students].sort(function(a,b){ return examTotal(b.exam) - examTotal(a.exam); }).forEach(function(s, i){
+      const e = s.exam || {};
+      examRows.push([ i+1, s.name, s.group || '未分组',
+        (s.year === null || s.year === undefined || s.year === '') ? '' : s.year,
+        e.ch||0, e.ma||0, e.en||0, e.ph||0, e.chm||0, e.bio||0, examTotal(e) ]);
+    });
+    sheets.push({ name:'六科成绩', cols:[8, 16, 16, 12, 10, 10, 10, 10, 10, 10, 10], rows: examRows });
+
+    /* 日清记录 */
+    const dailyRows = [[ H('日期'), H('科目'), H('考试名称'), H('姓名'), H('小组'), H('分数'), H('该次班级均分') ]];
+    dailySorted().slice().reverse().forEach(function(d){
+      const scores = d.scores || {};
+      const arr = Object.keys(scores).map(function(k){ return Number(scores[k]); }).filter(function(v){ return !isNaN(v); });
+      const avg = arr.length ? Math.round(arr.reduce(function(a,b){ return a+b; },0) / arr.length * 10) / 10 : '';
+      students.forEach(function(s){
+        if(scores[s.id] === undefined || scores[s.id] === null || String(scores[s.id]) === '') return;
+        dailyRows.push([ String(d.date || ''), d.subject || '', d.examName || '', s.name, s.group || '未分组', Number(scores[s.id]), avg ]);
+      });
+    });
+    if(dailyRows.length === 1) dailyRows.push(['暂无日清记录','','','','','','']);
+    sheets.push({ name:'日清记录', cols:[14, 10, 28, 14, 14, 10, 14], rows: dailyRows });
+
+    /* 六科日清平均分 */
+    const avgRows = [[ H('姓名'), H('小组'), H('语文'), H('数学'), H('英语'), H('物理'), H('化学'), H('生物') ]];
+    students.forEach(function(s){
+      const cells = SUBJECTS.map(function(sub){
+        let sum = 0, cnt = 0;
+        dailyLogs.forEach(function(d){
+          if(d.subject !== sub) return;
+          const v = (d.scores || {})[s.id];
+          if(v !== undefined && v !== null && String(v) !== ''){ sum += Number(v) || 0; cnt++; }
+        });
+        return cnt ? Math.round(sum / cnt * 10) / 10 : '';
+      });
+      avgRows.push([ s.name, s.group || '未分组' ].concat(cells));
+    });
+    sheets.push({ name:'日清平均分', cols:[14, 14, 10, 10, 10, 10, 10, 10], rows: avgRows });
+
+    /* 本周 / 本月总结 */
+    [['本周总结', weekStart(Date.now())], ['本月总结', monthStart(Date.now())]].forEach(function(pair){
+      const sm = buildSummary(pair[1]);
+      const rows = [[ H('项目'), H('数值') ]];
+      rows.push(['统计起始', fmtDate(pair[1])]);
+      rows.push(['加分合计', sm.totalPlus]);
+      rows.push(['扣分合计', sm.totalMinus]);
+      rows.push(['净变化', sm.net]);
+      rows.push(['记录条数', sm.logCount]);
+      rows.push(['参与人数', sm.active + ' / ' + students.length]);
+      rows.push([]);
+      rows.push([ H('姓名'), H('小组'), H('加分'), H('扣分'), H('净变化'), H('记录数') ]);
+      sm.rows.forEach(function(r){ rows.push([ r.name, r.group, r.plus, r.minus, r.net, r.cnt ]); });
+      rows.push([]);
+      rows.push([ H('小组'), H('加分'), H('扣分'), H('净变化'), H('记录数') ]);
+      sm.groups.forEach(function(g){ rows.push([ g.group, g.plus, g.minus, g.net, g.cnt ]); });
+      rows.push([]);
+      rows.push([ H('高频理由'), H('出现次数') ]);
+      sm.topReasons.forEach(function(t){ rows.push([ t.reason, t.cnt ]); });
+      sheets.push({ name: pair[0], cols:[18, 16, 12, 12, 12, 12], rows: rows });
+    });
+
+    return sheets;
+  }
+  function reportFileName(prefix){
+    const d = new Date();
+    return prefix + '_' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0')
+      + '_' + String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + '.xlsx';
+  }
+
+  /* ================= CSV 工具 / 模板 / 导入 ================= */
+  function downloadCsv(text, filename){
+    const blob = new Blob(['\ufeff' + text], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 3000);
+  }
+
+  function parseCsvLine(line){
+    const out = [];
+    let cur = '', inQ = false;
+    for(let i=0; i<line.length; i++){
+      const ch = line.charAt(i);
+      if(inQ){
+        if(ch === '"'){
+          if(line.charAt(i+1) === '"'){ cur += '"'; i++; }
+          else inQ = false;
+        }else cur += ch;
+      }else if(ch === '"'){ inQ = true; }
+      else if(ch === ','){ out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function readCsvRows(text){
+    text = String(text || '').replace(/^\ufeff/, '');
+    return text.split(/\r?\n/).filter(r=>r.trim()).map(parseCsvLine);
+  }
+
+  /* 表头智能识别：不管列顺序，只要列名对得上就能导入 */
+  const HEAD_KEYS = {
+    '姓名':'name', '名字':'name', '学生':'name', '学生姓名':'name',
+    '性别':'gender',
+    '小组':'group', '组别':'group', '组号':'group', '所在小组':'group',
+    '职务':'duty', '职位':'duty',
+    '积分':'score', '初始积分':'score', '积分总数':'score', '总分（积分）':'score',
+    '学年榜':'year',
+    '语文':'ch', '数学':'ma', '英语':'en', '外语':'en', '物理':'ph', '化学':'chm', '生物':'bio'
+  };
+  function mapHeader(row){
+    const map = {};
+    row.forEach((h, idx)=>{
+      const key = String(h || '').replace(/[\s\*（）()]/g, '').trim();
+      const hit = HEAD_KEYS[key] || HEAD_KEYS[key.replace(/[^\u4e00-\u9fa5]/g,'')];
+      if(hit) map[hit] = idx;
+    });
+    return map;
+  }
+
+  /* --- 下载学生名单模板 --- */
+  function stuTemplateText(){
+    let t = '姓名,性别,小组,职务,积分,学年榜\n';
+    t += '张三,男,第1组,班长,0,\n';
+    t += '李四,女,第1组,学习委员,0,\n';
+    t += '王五,男,第2组,普通成员,0,\n';
+    t += '赵六,女,第2组,普通成员,0,\n';
+    return t;
+  }
+  $('btnTplStu').onclick = function(){
+    downloadCsv(stuTemplateText(), '学生名单导入模板.csv');
+    toast('模板已下载，填好后用「批量导入名单」导入');
+  };
+
+  /* --- 下载成绩导入模板（自动带上全班姓名） --- */
+  function examTemplateText(){
+    let t = '姓名,学年榜,语文,数学,英语,物理,化学,生物\n';
+    if(students.length === 0){
+      t += '张三,,90,95,88,76,82,79\n李四,,85,92,90,80,78,85\n';
+    }else{
+      students.forEach(s=>{
+        const e = s.exam || {};
+        const yv = (s.year === null || s.year === undefined || s.year === '') ? '' : s.year;
+        t += [s.name, yv, e.ch||'', e.ma||'', e.en||'', e.ph||'', e.chm||'', e.bio||''].join(',') + '\n';
+      });
+    }
+    return t;
+  }
+  function downloadExamTemplate(){
+    downloadCsv(examTemplateText(), '成绩导入模板.csv');
+    toast('成绩模板已下载，填好后用「导入成绩表」');
+  }
+  if($('btnTplExam')) $('btnTplExam').onclick = downloadExamTemplate;
+  if($('btnTplExam2')) $('btnTplExam2').onclick = downloadExamTemplate;
+
+  /* --- 导入学生名单 --- */
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.id = 'fileCsv';
+  fileInput.accept = '.csv,.txt';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+
+  $('btnOpenCsv').onclick = function(){
+    fileInput.value = '';
+    fileInput.click();
+  };
+
+  fileInput.onchange = function(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        const rows = readCsvRows(ev.target.result);
+        if(rows.length === 0){ toast('文件是空的'); return; }
+
+        let headMap = mapHeader(rows[0]);
+        let start = 1;
+        if(headMap.name === undefined){ headMap = { name:0, gender:1, group:2, duty:3, score:4 }; start = 0; }
+
+        let added = 0, updated = 0;
+        for(let i=start; i<rows.length; i++){
+          const r = rows[i];
+          const name = String(r[headMap.name] || '').trim();
+          if(!name) continue;
+
+          let group = headMap.group !== undefined ? String(r[headMap.group] || '').trim() : '';
+          if(/^\d+$/.test(group)) group = '第' + group + '组';
+
+          const gender = headMap.gender !== undefined ? String(r[headMap.gender] || '').trim() : '';
+          const duty = headMap.duty !== undefined ? String(r[headMap.duty] || '').trim() : '';
+          const scoreVal = headMap.score !== undefined ? Number(String(r[headMap.score] || '').trim()) : 0;
+          const yearVal = headMap.year !== undefined ? String(r[headMap.year] || '').trim() : '';
+
+          const exist = students.filter(s=>s.name === name)[0];
+          if(exist){
+            exist.group = group;
+            if(gender) exist.gender = gender;
+            exist.duty = duty;
+            if(!isNaN(scoreVal)) exist.score = scoreVal;
+            if(yearVal !== '') exist.year = Number(yearVal);
+            updated++;
+          }else{
+            students.push({
+              id: Date.now() + i,
+              name: name,
+              gender: gender,
+              group: group,
+              duty: duty,
+              score: isNaN(scoreVal) ? 0 : scoreVal,
+              logs: [],
+              exam: { ch:0, ma:0, en:0, ph:0, chm:0, bio:0 },
+              attend: '',
+              year: yearVal === '' ? null : Number(yearVal)
+            });
+            added++;
+          }
+        }
+        renderAll();
+        scheduleSave();
+        toast('导入完成：新增 ' + added + ' 人，更新 ' + updated + ' 人');
+      }catch(err){
+        console.warn(err);
+        toast('导入失败，请检查文件格式');
+      }
+      e.target.value = '';
+    };
+    reader.onerror = function(){ toast('文件读取失败'); };
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  /* --- 导入成绩表 --- */
+  const examInput = document.createElement('input');
+  examInput.type = 'file';
+  examInput.accept = '.csv,.txt';
+  examInput.id = 'fileExam';
+  examInput.style.display = 'none';
+  document.body.appendChild(examInput);
+
+  function openExamImport(){ examInput.value = ''; examInput.click(); }
+  if($('btnImportExam')) $('btnImportExam').onclick = openExamImport;
+  if($('btnImportExam2')) $('btnImportExam2').onclick = openExamImport;
+
+  examInput.onchange = function(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        const rows = readCsvRows(ev.target.result);
+        if(rows.length === 0){ toast('文件是空的'); return; }
+
+        let headMap = mapHeader(rows[0]);
+        if(headMap.name === undefined){ headMap = { name:0, year:1, ch:2, ma:3, en:4, ph:5, chm:6, bio:7 }; }
+        if(headMap.name === undefined){ toast('表头里找不到「姓名」列'); return; }
+
+        let done = 0;
+        const missing = [];
+        for(let i=1; i<rows.length; i++){
+          const r = rows[i];
+          const name = String(r[headMap.name] || '').trim();
+          if(!name) continue;
+          const stu = students.filter(s=>s.name === name)[0];
+          if(!stu){ missing.push(name); continue; }
+          if(!stu.exam) stu.exam = { ch:0, ma:0, en:0, ph:0, chm:0, bio:0 };
+          ['ch','ma','en','ph','chm','bio'].forEach(k=>{
+            if(headMap[k] !== undefined){
+              const v = String(r[headMap[k]] || '').trim();
+              if(v !== '') stu.exam[k] = Number(v) || 0;
+            }
+          });
+          if(headMap.year !== undefined){
+            const yv = String(r[headMap.year] || '').trim();
+            stu.year = yv === '' ? null : (Number(yv) || 0);
+          }
+          done++;
+        }
+        renderAll();
+        scheduleSave();
+        toast('成绩导入完成：更新 ' + done + ' 人' + (missing.length ? '，未匹配 ' + missing.length + ' 人' : ''));
+        if(missing.length) console.warn('未匹配到的姓名：', missing.join('、'));
+      }catch(err){
+        console.warn(err);
+        toast('导入失败，请检查文件格式');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  /* ================= JSON 备份恢复 ================= */
+  const jsonInput = document.createElement('input');
+  jsonInput.type = 'file';
+  jsonInput.accept = '.json';
+  jsonInput.style.display = 'none';
+  document.body.appendChild(jsonInput);
+
+  jsonInput.onchange = function(e){
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        const obj = JSON.parse(String(ev.target.result || ''));
+        if(!obj || typeof obj !== 'object') throw new Error('格式错误');
+        if(!Array.isArray(obj.students)) throw new Error('不是本系统的备份文件');
+
+        /* 预览统计 */
+        const inStu = obj.students.length;
+        const inLog = obj.students.reduce(function(n,s){ return n + ((s.logs && s.logs.length) || 0); }, 0);
+        const inDaily = (obj.dailyLogs || []).length;
+        const inDailyScore = (obj.dailyLogs || []).reduce(function(n,d){ return n + Object.keys(d.scores || {}).length; }, 0);
+        const inGoods = (obj.shopGoods || []).length;
+        const inRedeem = (obj.redeemLogs || []).length;
+        const inHw = (obj.homeworks || []).length;
+        const curLog = students.reduce(function(n,s){ return n + ((s.logs && s.logs.length) || 0); }, 0);
+        const msg =
+          '📦 备份文件内容\n' +
+          '· 学生：' + inStu + ' 人\n' +
+          '· 积分记录：' + inLog + ' 条\n' +
+          '· 日清记录：' + inDaily + ' 次考试 / ' + inDailyScore + ' 个分数\n' +
+          '· 考勤归档：' + (obj.attendLogs || []).length + ' 天\n' +
+          '· 奖品 ' + inGoods + ' 件 · 兑换 ' + inRedeem + ' 条 · 作业 ' + inHw + ' 条\n' +
+          (obj.exportTime ? '· 导出时间：' + obj.exportTime + '\n' : '') +
+          (obj.account ? '· 备份来源账号：' + obj.account + '\n' : '') +
+          '\n⚠️ 确认后将覆盖当前账号的全部数据（现有学生 ' + students.length + ' 人 / 记录 ' + curLog + ' 条）。';
+        uiConfirm('导入备份（请核对）', msg, function(){
+          students = obj.students || [];
+          shopGoods = obj.shopGoods || [];
+          redeemLogs = obj.redeemLogs || [];
+          homeworks = obj.homeworks || [];
+          notices = obj.notices || '';
+          dailyLogs = obj.dailyLogs || [];
+          attendLogs = obj.attendLogs || [];
+
+          renderAll();
+          scheduleSave();
+          closeModal();
+          toast('导入成功：学生 ' + students.length + ' 人，积分记录 ' + students.reduce(function(n,s){ return n + ((s.logs && s.logs.length) || 0); }, 0) + ' 条，日清 ' + dailyLogs.length + ' 次，考勤 ' + attendLogs.length + ' 天');
+        }, '覆盖导入');
+      }catch(err){
+        toast('备份文件无法识别');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+
+  /* ================= 点击遮罩关闭弹窗 ================= */
+  $('modalBack').addEventListener('click', function(e){
+    if(e.target === this) closeModal();
+  });
+
+  /* ================= 只读（家长）模式 ================= */
+  let readOnly = false;
+  const QP = (function(){ try{ return new URLSearchParams(location.search); }catch(e){ return null; } })();
+  if(QP && QP.get('view') === '1') readOnly = true;
+  const VIEW_USER = QP ? (QP.get('u') || '') : '';
+
+  function enterReadOnly(user){
+    readOnly = true;
+    document.body.classList.add('readonly');
+    const badge = document.createElement('div');
+    badge.className = 'ro-badge';
+    badge.textContent = '👀 仅查看模式';
+    document.body.appendChild(badge);
+    if(user) currentUser = user;
+    if($('curUser')) $('curUser').textContent = currentUser || '—';
+    loginView.classList.add('hidden');
+    appView.classList.remove('hidden');
+    setSync('正在读取云端数据…', '#f59e0b');
+    fetchCloudBackup(currentUser, 9000).then(function(res){
+      if(res && res.ok && res.data){
+        applyBackupData(res.data); renderAll();
+        const st = backupStat(res.data);
+        setSync('云端数据 · 学生 ' + st.stu + ' 人', '#10b981');
+      }else{
+        const lb = readLocalBackup(currentUser);
+        if(lb){ applyBackupData(lb); renderAll(); }
+        setSync('⚠️ 云端暂时读不到，显示上次缓存', '#f59e0b');
+      }
+      initCountdown();
+    });
+    /* 只读模式禁止一切写入 */
+    setInterval(function(){
+      if(!currentUser) return;
+      fetchCloudBackup(currentUser, 9000).then(function(res){
+        if(res && res.ok && res.data){ applyBackupData(res.data); renderAll(); setSync('云端数据 · 学生 ' + backupStat(res.data).stu + ' 人', '#10b981'); }
+      });
+    }, 5 * 60 * 1000);
+  }
+
+  /* ================= 首次渲染 ================= */
+  renderAll();
+  if(readOnly && VIEW_USER){
+    enterReadOnly(VIEW_USER);
+  }else{
+    setTimeout(function(){ precheckCloud(); }, 300);
+
+  /* 离线模式下每 5 分钟自动探一次云端，恢复后自动把本机数据推上去 */
+  setInterval(function(){
+    if(readOnly || !currentUser) return;
+    if(!cloudOffline) return;
+    precheckCloud().then(function(ok){
+      if(ok){
+        cloudOffline = false; cloudBusy = false;
+        toast('✅ 云端已恢复，正在自动上传本机数据…');
+        pushToCloud({ silent: true });
+      }
+    });
+  }, 5 * 60 * 1000);
+  }
+});
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
